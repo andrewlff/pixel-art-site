@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pixelizer — 在线像素化 + 动作帧</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='%230a0a0f'/><rect x='2' y='2' width='5' height='5' fill='%2322d3ee'/><rect x='9' y='9' width='5' height='5' fill='%2322d3ee'/></svg>">
+<style>
+:root {
+  --bg: #0a0a0f; --surface: #12121a; --surface2: #1a1a25;
+  --border: #252535; --text: #e8e8f0; --text-dim: #8888a0;
+  --accent: #22d3ee; --accent2: #a78bfa; --green: #34d399;
+  --orange: #fb923c; --red: #f87171; --yellow: #fbbf24;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: 'SF Mono','Cascadia Code','Consolas',monospace; min-height: 100vh; }
+
+.header { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.header h1 { font-size: 18px; }
+.header h1 span { color: var(--accent); }
+.header .github-link { font-size: 12px; color: var(--text-dim); text-decoration: none; }
+.header .github-link:hover { color: var(--accent); }
+
+/* Mode tabs */
+.mode-tabs { display: flex; gap: 0; padding: 0 24px; border-bottom: 1px solid var(--border); }
+.mode-tab { padding: 10px 16px; font-size: 13px; color: var(--text-dim); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+.mode-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.mode-tab:hover { color: var(--text); }
+
+.main { display: grid; grid-template-columns: 280px 1fr; min-height: calc(100vh - 105px); }
+
+.sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 20px; overflow-y: auto; }
+.control-group { margin-bottom: 20px; }
+.control-group label { display: block; font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.control-group .value { float: right; color: var(--accent); }
+
+input[type=range] { width: 100%; -webkit-appearance: none; height: 4px; background: var(--surface2); border-radius: 2px; outline: none; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; }
+
+.toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
+.toggle-row span { font-size: 13px; }
+.toggle { position: relative; width: 40px; height: 22px; background: var(--surface2); border-radius: 11px; cursor: pointer; transition: background 0.2s; }
+.toggle.on { background: var(--green); }
+.toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform 0.2s; }
+.toggle.on::after { transform: translateX(18px); }
+
+.btn { display: block; width: 100%; padding: 9px; border: none; border-radius: 6px; font-family: inherit; font-size: 13px; cursor: pointer; margin-bottom: 6px; text-align: center; transition: opacity 0.15s; }
+.btn:hover { opacity: 0.85; }
+.btn-primary { background: var(--accent); color: #0a0a0f; font-weight: 600; }
+.btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.btn-green { background: var(--green); color: #0a0a0f; font-weight: 600; }
+
+.canvas-area { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; overflow: auto; }
+.canvas-wrap { position: relative; max-width: 100%; }
+canvas { max-width: 100%; image-rendering: pixelated; image-rendering: crisp-edges; border: 1px solid var(--border); border-radius: 4px; background: conic-gradient(#2a2a3a 0% 25%, #1a1a25 0% 50%, #2a2a3a 0% 75%, #1a1a25 0) 0 0/16px 16px; }
+
+.upload-zone {
+  border: 2px dashed var(--border); border-radius: 8px; padding: 50px 40px;
+  text-align: center; cursor: pointer; transition: border-color 0.2s; max-width: 500px;
+}
+.upload-zone:hover { border-color: var(--accent); }
+.upload-zone .icon { font-size: 42px; margin-bottom: 10px; }
+.upload-zone .text { font-size: 14px; color: var(--text-dim); }
+.upload-zone .hint { font-size: 11px; color: var(--text-dim); margin-top: 6px; }
+
+/* Frame strip */
+.frame-strip { display: flex; gap: 4px; margin-top: 12px; flex-wrap: wrap; justify-content: center; max-width: 100%; }
+.frame-thumb { width: 48px; height: 48px; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; cursor: pointer; opacity: 0.5; transition: opacity 0.15s; background: conic-gradient(#2a2a3a 0% 25%, #1a1a25 0% 50%, #2a2a3a 0% 75%, #1a1a25 0) 0 0/8px 8px; }
+.frame-thumb.active { opacity: 1; border-color: var(--accent); }
+.frame-thumb canvas { width: 100%; height: 100%; border: none; border-radius: 0; }
+
+.frame-info { font-size: 11px; color: var(--text-dim); margin-top: 8px; }
+
+.hidden-input { display: none; }
+
+@media (max-width: 768px) {
+  .main { grid-template-columns: 1fr; }
+  .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Pixelizer <span>· 像素化 + 动作帧</span></h1>
+  <a class="github-link" href="https://github.com/andrewlff/pixel-art-action-frames" target="_blank">GitHub ↗</a>
+</div>
+
+<div class="mode-tabs">
+  <div class="mode-tab active" data-mode="single">Single Image</div>
+  <div class="mode-tab" data-mode="animation">Animation Frames</div>
+</div>
+
+<div class="main">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="control-group">
+      <label>Grid Size <span class="value" id="grid-val">64</span></label>
+      <input type="range" id="grid" min="8" max="128" value="64">
+    </div>
+    <div class="control-group">
+      <label>Colors <span class="value" id="colors-val">32</span></label>
+      <input type="range" id="colors" min="2" max="64" value="32">
+    </div>
+    <div class="control-group">
+      <label>Scale <span class="value" id="scale-val">8</span></label>
+      <input type="range" id="scale" min="1" max="16" value="8">
+    </div>
+
+    <div class="control-group" id="fps-group" style="display:none">
+      <label>FPS <span class="value" id="fps-val">8</span></label>
+      <input type="range" id="fps" min="1" max="24" value="8">
+    </div>
+
+    <div class="control-group">
+      <div class="toggle-row"><span>Outline</span><div class="toggle on" id="outline-toggle"></div></div>
+    </div>
+    <div class="control-group">
+      <div class="toggle-row"><span>Transparent BG</span><div class="toggle" id="transparent-toggle"></div></div>
+    </div>
+    <div class="control-group" id="tol-group" style="display:none">
+      <label>BG Tolerance <span class="value" id="tol-val">40</span></label>
+      <input type="range" id="tol" min="5" max="150" value="40">
+    </div>
+
+    <button class="btn btn-primary" id="download-btn" style="display:none">Download PNG</button>
+    <button class="btn btn-secondary" id="compare-btn" style="display:none">Compare Original</button>
+    <button class="btn btn-green" id="play-btn" style="display:none">▶ Play</button>
+    <button class="btn btn-secondary" id="download-frames-btn" style="display:none">Download All Frames</button>
+  </div>
+
+  <!-- Canvas -->
+  <div class="canvas-area" id="canvas-area">
+    <div class="upload-zone" id="upload-zone">
+      <div class="icon">🎮</div>
+      <div class="text" id="upload-text">Drop image(s) here or click to upload</div>
+      <div class="hint" id="upload-hint">Single: 1 image · Animation: multi-select PNGs</div>
+    </div>
+    <div class="canvas-wrap" id="canvas-wrap" style="display:none">
+      <canvas id="output"></canvas>
+      <div class="frame-strip" id="frame-strip"></div>
+      <div class="frame-info" id="frame-info"></div>
+    </div>
+  </div>
+</div>
+
+<input type="file" class="hidden-input" id="file-input" accept="image/*" multiple>
+
+<script>
+const uploadZone = document.getElementById('upload-zone');
+const fileInput = document.getElementById('file-input');
+const canvas = document.getElementById('output');
+const ctx = canvas.getContext('2d');
+const canvasWrap = document.getElementById('canvas-wrap');
+const downloadBtn = document.getElementById('download-btn');
+const compareBtn = document.getElementById('compare-btn');
+const playBtn = document.getElementById('play-btn');
+const downloadFramesBtn = document.getElementById('download-frames-btn');
+const frameStrip = document.getElementById('frame-strip');
+const frameInfo = document.getElementById('frame-info');
+const fpsGroup = document.getElementById('fps-group');
+const fpsSlider = document.getElementById('fps');
+const fpsVal = document.getElementById('fps-val');
+const tolGroup = document.getElementById('tol-group');
+const tolSlider = document.getElementById('tol');
+const tolVal = document.getElementById('tol-val');
+
+let mode = 'single';
+let originalImgs = []; // array of Image
+let processedFrames = []; // array of canvas (small pixel canvases)
+let currentFrame = 0;
+let playing = false;
+let playTimer = null;
+let showingOriginal = false;
+
+// ---- Mode switch ----
+document.querySelectorAll('.mode-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    mode = tab.dataset.mode;
+    fpsGroup.style.display = mode === 'animation' ? '' : 'none';
+    resetAll();
+  });
+});
+
+function resetAll() {
+  originalImgs = [];
+  processedFrames = [];
+  currentFrame = 0;
+  stopPlay();
+  uploadZone.style.display = '';
+  canvasWrap.style.display = 'none';
+  downloadBtn.style.display = 'none';
+  compareBtn.style.display = 'none';
+  playBtn.style.display = 'none';
+  downloadFramesBtn.style.display = 'none';
+  frameStrip.innerHTML = '';
+  frameInfo.textContent = '';
+  fileInput.value = '';
+}
+
+// ---- Upload ----
+uploadZone.addEventListener('click', () => fileInput.click());
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.style.borderColor = 'var(--accent)'; });
+uploadZone.addEventListener('dragleave', () => uploadZone.style.borderColor = '');
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.style.borderColor = '';
+  const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+  if (files.length) loadFiles(files);
+});
+fileInput.addEventListener('change', e => {
+  const files = Array.from(e.target.files);
+  if (files.length) loadFiles(files);
+});
+
+function loadFiles(files) {
+  if (mode === 'single') files = files.slice(0, 1);
+  let loaded = 0;
+  originalImgs = [];
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        originalImgs.push(img);
+        loaded++;
+        if (loaded === files.length) processAll();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ---- Controls ----
+const gridSlider = document.getElementById('grid');
+const colorsSlider = document.getElementById('colors');
+const scaleSlider = document.getElementById('scale');
+const outlineToggle = document.getElementById('outline-toggle');
+const transparentToggle = document.getElementById('transparent-toggle');
+
+let outlineEnabled = true, transparentEnabled = false;
+
+[gridSlider, colorsSlider, scaleSlider, fpsSlider, tolSlider].forEach(el => {
+  el.addEventListener('input', () => {
+    document.getElementById(el.id + '-val').textContent = el.value;
+    if (originalImgs.length) processAll();
+  });
+});
+outlineToggle.addEventListener('click', () => { outlineEnabled = !outlineEnabled; outlineToggle.classList.toggle('on', outlineEnabled); if (originalImgs.length) processAll(); });
+transparentToggle.addEventListener('click', () => {
+  transparentEnabled = !transparentEnabled;
+  transparentToggle.classList.toggle('on', transparentEnabled);
+  tolGroup.style.display = transparentEnabled ? '' : 'none';
+  if (originalImgs.length) processAll();
+});
+
+downloadBtn.addEventListener('click', () => {
+  const link = document.createElement('a');
+  link.download = 'pixelated.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+});
+
+compareBtn.addEventListener('click', () => {
+  if (!originalImgs.length) return;
+  showingOriginal = !showingOriginal;
+  if (showingOriginal) {
+    const img = originalImgs[currentFrame] || originalImgs[0];
+    canvas.width = img.width; canvas.height = img.height;
+    ctx.drawImage(img, 0, 0);
+  } else {
+    renderFrame(currentFrame);
+  }
+  compareBtn.textContent = showingOriginal ? 'Show Pixelated' : 'Compare Original';
+});
+
+playBtn.addEventListener('click', () => {
+  if (playing) stopPlay();
+  else startPlay();
+});
+
+downloadFramesBtn.addEventListener('click', () => {
+  processedFrames.forEach((frame, i) => {
+    const link = document.createElement('a');
+    link.download = `frame_${String(i).padStart(3,'0')}.png`;
+    link.href = frame.toDataURL('image/png');
+    link.click();
+  });
+});
+
+function startPlay() {
+  if (processedFrames.length < 2) return;
+  playing = true;
+  playBtn.textContent = '⏸ Pause';
+  const fps = +fpsSlider.value;
+  playTimer = setInterval(() => {
+    currentFrame = (currentFrame + 1) % processedFrames.length;
+    renderFrame(currentFrame);
+  }, 1000 / fps);
+}
+function stopPlay() {
+  playing = false;
+  playBtn.textContent = '▶ Play';
+  if (playTimer) { clearInterval(playTimer); playTimer = null; }
+}
+
+// ---- Process all frames ----
+function processAll() {
+  processedFrames = originalImgs.map(img => processOne(img));
+  currentFrame = 0;
+  renderFrame(0);
+  buildFrameStrip();
+  uploadZone.style.display = 'none';
+  canvasWrap.style.display = 'block';
+  downloadBtn.style.display = 'block';
+  compareBtn.style.display = 'block';
+
+  if (mode === 'animation' && processedFrames.length > 1) {
+    playBtn.style.display = 'block';
+    downloadFramesBtn.style.display = 'block';
+    startPlay();
+  } else {
+    playBtn.style.display = 'none';
+    downloadFramesBtn.style.display = 'none';
+    stopPlay();
+  }
+}
+
+function processOne(img) {
+  const grid = +gridSlider.value;
+  const numColors = +colorsSlider.value;
+
+  const tmp = document.createElement('canvas');
+  tmp.width = grid;
+  tmp.height = Math.round(grid * img.height / img.width);
+  const tctx = tmp.getContext('2d');
+  tctx.drawImage(img, 0, 0, tmp.width, tmp.height);
+  const imgData = tctx.getImageData(0, 0, tmp.width, tmp.height);
+  const px = imgData.data;
+
+  // Quantize
+  const colorMap = medianCut(px, numColors);
+  for (let i = 0; i < px.length; i += 4) {
+    const key = (px[i] << 16) | (px[i+1] << 8) | px[i+2];
+    if (colorMap.has(key)) {
+      const c = colorMap.get(key);
+      px[i] = c[0]; px[i+1] = c[1]; px[i+2] = c[2];
+    }
+  }
+  tctx.putImageData(imgData, 0, 0);
+
+  if (transparentEnabled) removeBackground(tctx, tmp.width, tmp.height);
+  if (outlineEnabled) applyOutline(tctx, tmp.width, tmp.height);
+
+  return tmp;
+}
+
+function renderFrame(idx) {
+  if (!processedFrames.length) return;
+  const frame = processedFrames[idx];
+  const scale = +scaleSlider.value;
+  canvas.width = frame.width * scale;
+  canvas.height = frame.height * scale;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
+  frameInfo.textContent = `Frame ${idx + 1} / ${processedFrames.length}`;
+  // Highlight thumb
+  frameStrip.querySelectorAll('.frame-thumb').forEach((t, i) => t.classList.toggle('active', i === idx));
+}
+
+function buildFrameStrip() {
+  frameStrip.innerHTML = '';
+  processedFrames.forEach((frame, i) => {
+    const thumb = document.createElement('div');
+    thumb.className = 'frame-thumb' + (i === 0 ? ' active' : '');
+    const tc = document.createElement('canvas');
+    const s = Math.max(1, Math.floor(48 / frame.width));
+    tc.width = frame.width * s;
+    tc.height = frame.height * s;
+    tc.getContext('2d').drawImage(frame, 0, 0, tc.width, tc.height);
+    thumb.appendChild(tc);
+    thumb.addEventListener('click', () => {
+      currentFrame = i;
+      renderFrame(i);
+    });
+    frameStrip.appendChild(thumb);
+  });
+}
+
+// ---- Algorithms (same as before) ----
+function medianCut(data, maxColors) {
+  const pixels = [];
+  for (let i = 0; i < data.length; i += 4) pixels.push([data[i], data[i+1], data[i+2]]);
+  if (pixels.length <= maxColors) {
+    const map = new Map();
+    pixels.forEach(c => map.set((c[0]<<16)|(c[1]<<8)|c[2], c));
+    return map;
+  }
+  let boxes = [pixels.slice()];
+  while (boxes.length < maxColors) {
+    let maxRange = 0, boxIdx = -1, channel = 0;
+    boxes.forEach((box, idx) => {
+      for (let ch = 0; ch < 3; ch++) {
+        let mn = 255, mx = 0;
+        box.forEach(p => { if (p[ch]<mn) mn=p[ch]; if (p[ch]>mx) mx=p[ch]; });
+        if (mx-mn > maxRange) { maxRange = mx-mn; boxIdx = idx; channel = ch; }
+      }
+    });
+    if (maxRange === 0) break;
+    const box = boxes[boxIdx].slice().sort((a,b) => a[channel]-b[channel]);
+    const mid = Math.floor(box.length/2);
+    boxes[boxIdx] = box.slice(0, mid);
+    boxes.push(box.slice(mid));
+  }
+  const map = new Map();
+  boxes.forEach(box => {
+    if (!box.length) return;
+    const avg = [0,0,0];
+    box.forEach(p => { avg[0]+=p[0]; avg[1]+=p[1]; avg[2]+=p[2]; });
+    avg[0]=Math.round(avg[0]/box.length); avg[1]=Math.round(avg[1]/box.length); avg[2]=Math.round(avg[2]/box.length);
+    box.forEach(p => map.set((p[0]<<16)|(p[1]<<8)|p[2], avg));
+  });
+  return map;
+}
+
+function removeBackground(ctx, w, h) {
+  const imgData = ctx.getImageData(0, 0, w, h);
+  const px = imgData.data;
+  const TOL = +tolSlider.value;
+
+  // Sample all edge pixels, find dominant (most common) color
+  const edgeColors = new Map();
+  const edgePoints = [];
+  for (let x = 0; x < w; x++) { edgePoints.push([x,0],[x,h-1]); }
+  for (let y = 0; y < h; y++) { edgePoints.push([0,y],[w-1,y]); }
+  edgePoints.forEach(([x,y]) => {
+    const i = (y*w+x)*4;
+    const key = (px[i]<<16)|(px[i+1]<<8)|px[i+2];
+    edgeColors.set(key, (edgeColors.get(key)||0)+1);
+  });
+  // Pick the most frequent edge color as background
+  let bgKey = 0, bgCount = 0;
+  edgeColors.forEach((count, key) => { if (count > bgCount) { bgCount = count; bgKey = key; } });
+  const br = (bgKey >> 16) & 0xff, bgc = (bgKey >> 8) & 0xff, bb = bgKey & 0xff;
+
+  // Flood-fill from edges
+  const visited = new Uint8Array(w*h);
+  const stack = [];
+  for (let x=0;x<w;x++){stack.push([x,0],[x,h-1]);}
+  for (let y=0;y<h;y++){stack.push([0,y],[w-1,y]);}
+  while (stack.length) {
+    const [x,y] = stack.pop();
+    if (x<0||x>=w||y<0||y>=h) continue;
+    const idx = y*w+x;
+    if (visited[idx]) continue;
+    visited[idx] = 1;
+    const i = idx*4;
+    if (px[i+3] < 10) continue;
+    const dr=px[i]-br, dg=px[i+1]-bgc, db=px[i+2]-bb;
+    if (Math.sqrt(dr*dr+dg*dg+db*db) < TOL) {
+      px[i+3] = 0;
+      stack.push([x+1,y],[x-1,y],[x,y+1],[x,y-1]);
+    }
+  }
+  ctx.putImageData(imgData, 0, 0);
+}
+
+function applyOutline(ctx, w, h) {
+  const imgData = ctx.getImageData(0, 0, w, h);
+  const px = imgData.data;
+  for (let y=0;y<h;y++) {
+    for (let x=0;x<w;x++) {
+      const idx = (y*w+x)*4;
+      if (px[idx+3] < 128) continue;
+      let shouldOutline = false;
+      for (let dy=-1;dy<=1&&!shouldOutline;dy++) {
+        for (let dx=-1;dx<=1;dx++) {
+          if (!dx&&!dy) continue;
+          const nx=x+dx, ny=y+dy;
+          if (nx<0||nx>=w||ny<0||ny>=h) { shouldOutline=true; break; }
+          const ni=(ny*w+nx)*4;
+          if (px[ni+3] < 128) { shouldOutline=true; break; }
+        }
+      }
+      if (shouldOutline) {
+        px[idx]=Math.round(px[idx]*0.7);
+        px[idx+1]=Math.round(px[idx+1]*0.7);
+        px[idx+2]=Math.round(px[idx+2]*0.7);
+      }
+    }
+  }
+  ctx.putImageData(imgData, 0, 0);
+}
+</script>
+</body>
+</html>

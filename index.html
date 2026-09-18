@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pixel Art Pipeline — 项目看板</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='%230a0a0f'/><rect x='3' y='3' width='4' height='4' fill='%2322d3ee'/><rect x='9' y='9' width='4' height='4' fill='%2322d3ee'/></svg>">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #12121a;
+  --surface2: #1a1a25;
+  --border: #252535;
+  --text: #e8e8f0;
+  --text-dim: #8888a0;
+  --accent: #22d3ee;
+  --accent2: #a78bfa;
+  --green: #34d399;
+  --orange: #fb923c;
+  --red: #f87171;
+  --yellow: #fbbf24;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'SF Mono', 'Cascadia Code', 'JetBrains Mono', 'Consolas', monospace;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+.container { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
+
+/* Header */
+.header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+.header h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+.header h1 span { color: var(--accent); }
+.header .date { font-size: 13px; color: var(--text-dim); }
+
+/* Stats row */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
+.stat-card .label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.stat-card .value { font-size: 28px; font-weight: 700; }
+.stat-card .value.accent { color: var(--accent); }
+.stat-card .value.green { color: var(--green); }
+.stat-card .value.orange { color: var(--orange); }
+.stat-card .sub { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+
+/* Section */
+.section { margin-bottom: 32px; }
+.section-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.section-title::before { content: ''; width: 3px; height: 16px; background: var(--accent); border-radius: 2px; }
+
+/* Repo cards */
+.repos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.repo-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; transition: border-color 0.2s; }
+.repo-card:hover { border-color: var(--accent); }
+.repo-card .repo-name { font-size: 14px; font-weight: 600; color: var(--accent); margin-bottom: 6px; }
+.repo-card .repo-desc { font-size: 12px; color: var(--text-dim); margin-bottom: 12px; line-height: 1.5; }
+.repo-card .repo-meta { display: flex; gap: 12px; font-size: 11px; color: var(--text-dim); }
+.repo-card .repo-meta span::before { content: '● '; color: var(--green); }
+
+/* Grid 2col */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+/* Calendar chart */
+.chart-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+#calendar-chart { height: 280px; }
+
+/* Task list */
+.task-list { display: flex; flex-direction: column; gap: 10px; }
+.task-item { display: flex; justify-content: space-between; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; }
+.task-item .task-name { font-size: 13px; }
+.task-item .task-schedule { font-size: 11px; color: var(--text-dim); }
+.task-item .task-status { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: rgba(52,211,153,0.15); color: var(--green); }
+
+/* Assets grid */
+.assets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.asset-item { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 14px; text-align: center; }
+.asset-item .asset-icon { font-size: 24px; margin-bottom: 6px; }
+.asset-item .asset-name { font-size: 11px; color: var(--text-dim); }
+
+/* Progress bar */
+.progress-row { margin-bottom: 12px; }
+.progress-row .progress-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+.progress-bar { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; transition: width 0.6s; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .repos { grid-template-columns: 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .assets { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>Pixel Art <span>Pipeline</span></h1>
+    <div class="date">2026-09-18 · 项目运营看板</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="label">GitHub Repos</div>
+      <div class="value accent">3</div>
+      <div class="sub">已发布公开仓库</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">小红书笔记</div>
+      <div class="value green">1</div>
+      <div class="sub">今日已发布 · 7 天规划中</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">定时任务</div>
+      <div class="value orange">2</div>
+      <div class="sub">每日发布 + 评论回复</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">美术资产</div>
+      <div class="value accent">4角色·24帧</div>
+      <div class="sub">像素画 + 攻击动画 + GIF</div>
+    </div>
+  </div>
+
+  <!-- GitHub Repos -->
+  <div class="section">
+    <div class="section-title">GitHub 仓库</div>
+    <div class="repos">
+      <div class="repo-card">
+        <div class="repo-name">pixel-art-action-frames</div>
+        <div class="repo-desc">核心管线：角色像素化 + 攻击动作帧 → 透明图集 + JSON + 动画 GIF</div>
+        <div class="repo-meta"><span>14 文件</span><span>MIT</span></div>
+      </div>
+      <div class="repo-card">
+        <div class="repo-name">godot-pixel-batch-tool</div>
+        <div class="repo-desc">Godot 4 编辑器插件：批量像素化导出 + CLI</div>
+        <div class="repo-meta"><span>11 文件</span><span>MIT</span></div>
+      </div>
+      <div class="repo-card">
+        <div class="repo-name">unity-pixel-batch-tool</div>
+        <div class="repo-desc">Unity 编辑器窗口：批量像素化 + 图集导出 + CLI</div>
+        <div class="repo-meta"><span>10 文件</span><span>MIT</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Calendar -->
+    <div class="section">
+      <div class="section-title">小红书 7 天发布日历</div>
+      <div class="chart-box">
+        <div id="calendar-chart"></div>
+      </div>
+    </div>
+
+    <!-- Scheduled Tasks -->
+    <div class="section">
+      <div class="section-title">定时任务</div>
+      <div class="task-list">
+        <div class="task-item">
+          <div>
+            <div class="task-name">每日小红书工具引流</div>
+            <div class="task-schedule">每天 20:45 · 本地电脑</div>
+          </div>
+          <div class="task-status">运行中</div>
+        </div>
+        <div class="task-item">
+          <div>
+            <div class="task-name">小红书评论回复与工具分发</div>
+            <div class="task-schedule">每天 14:20 · 本地电脑</div>
+          </div>
+          <div class="task-status">运行中</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assets -->
+  <div class="section">
+    <div class="section-title">美术资产清单</div>
+    <div class="assets">
+      <div class="asset-item"><div class="asset-icon">🎨</div><div class="asset-name">4 角色像素画</div></div>
+      <div class="asset-item"><div class="asset-icon">⚔️</div><div class="asset-name">24 攻击帧</div></div>
+      <div class="asset-item"><div class="asset-icon">🎞️</div><div class="asset-name">4 透明 GIF</div></div>
+      <div class="asset-item"><div class="asset-icon">📦</div><div class="asset-name">3 引擎插件</div></div>
+    </div>
+  </div>
+
+  <!-- OSS Application -->
+  <div class="section">
+    <div class="section-title">Codex for Open Source 申请进度</div>
+    <div class="chart-box" style="padding: 20px;">
+      <div class="progress-row">
+        <div class="progress-label"><span>材料准备</span><span>100%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%;background:var(--green)"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>GitHub 仓库发布</span><span>100%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%;background:var(--green)"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>小红书引流积累</span><span>5%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:5%;background:var(--orange)"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>提交申请</span><span>0%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:0%;background:var(--red)"></div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Calendar chart
+var chart = echarts.init(document.getElementById('calendar-chart'));
+var days = ['9/18', '9/19', '9/20', '9/21', '9/22', '9/23', '9/24'];
+var types = ['A 效果展示', 'B 教程干货', 'C 演示视频', 'A 效果展示', 'A 效果展示', 'B 教程干货', 'D 开源更新'];
+var colors = ['#22d3ee', '#a78bfa', '#34d399', '#22d3ee', '#22d3ee', '#a78bfa', '#fbbf24'];
+
+chart.setOption({
+  grid: { left: 50, right: 20, top: 30, bottom: 30 },
+  xAxis: {
+    type: 'category',
+    data: days,
+    axisLine: { lineStyle: { color: '#252535' } },
+    axisLabel: { color: '#8888a0', fontSize: 11 }
+  },
+  yAxis: {
+    type: 'category',
+    data: [''],
+    axisLine: { show: false },
+    axisLabel: { show: false }
+  },
+  series: [{
+    type: 'scatter',
+    symbolSize: 28,
+    data: days.map(function(d, i) {
+      return [i, 0, colors[i], types[i]];
+    }),
+    itemStyle: { color: function(p) { return p.data[2]; }, borderRadius: 4 },
+    label: {
+      show: true,
+      formatter: function(p) { return p.data[3].split(' ')[0]; },
+      color: '#0a0a0f',
+      fontSize: 10,
+      fontWeight: 'bold'
+    }
+  }],
+  tooltip: {
+    backgroundColor: '#1a1a25',
+    borderColor: '#252535',
+    textStyle: { color: '#e8e8f0', fontSize: 12 },
+    formatter: function(p) { return p.data[1] + '<br/>' + p.data[3]; }
+  }
+});
+window.addEventListener('resize', function() { chart.resize(); });
+</script>
+</body>
+</html>
