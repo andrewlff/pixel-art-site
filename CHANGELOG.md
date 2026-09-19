@@ -2,6 +2,25 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+## [Unreleased] — 2026-09-19
+
+### Added
+- Pixelizer Web 工具上线 GitHub Pages：https://andrewlff.github.io/pixel-art-site/
+- Animation Frames 模式：多帧批量像素化 + 循环播放 + FPS 调节
+- BG Tolerance 容差滑块，背景去除可调
+- 项目看板 dashboard.html（GitHub 仓库/小红书日历/定时任务/OSS 进度）
+
+### Fixed
+- Transparent BG toggle 变量名 typo（!transparentToggle → !transparentEnabled）
+- 背景采样从四角平均改为整条边缘众数
+- GitHub Pages 首页改为 Pixelizer 工具本体
+
+### Deploy
+- pixel-art-site repo 创建并启用 GitHub Pages
+- 每次 push 自动部署
+
+---
+
 ## [Unreleased] — 2026-09-18
 
 ### Added
