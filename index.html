@@ -86,6 +86,7 @@ canvas { max-width: 100%; image-rendering: pixelated; image-rendering: crisp-edg
   <div style="display:flex;gap:16px;align-items:center">
     <a class="github-link" href="https://github.com/andrewlff/pixel-art-action-frames" target="_blank">GitHub ↗</a>
     <a class="github-link" href="#" onclick="var a=prompt('USDT (TRC20) 收款地址：\n点击确定复制','TFtHDFWCMFMxLCtsBQpPudToiKry6ETTQ1');if(a)navigator.clipboard.writeText(a);return false;" style="color:#f472b6">❤ 赞助我</a>
+    <button onclick="toggleLang()" style="background:var(--surface2);border:1px solid var(--border);color:var(--accent);border-radius:6px;padding:4px 12px;cursor:pointer;font-family:inherit;font-size:12px">中 / EN</button>
   </div>
 </div>
 
@@ -962,6 +963,101 @@ aiCopyBtn.addEventListener('click', () => {
     setTimeout(() => aiCopyBtn.textContent = '📋 Copy Prompt', 1500);
   });
 });
+</script>
+
+<script>
+const I18N = {
+  'Single Image': '单图模式',
+  'Animation Frames': '动画帧模式',
+  'AI Generate': 'AI 生成',
+  'Grid Size': '网格大小',
+  'Colors': '颜色数',
+  'Scale': '缩放',
+  'FPS': '帧率',
+  'Split Sheet': '拆分图集',
+  'Cols': '列数',
+  'Rows': '行数',
+  'Sample FPS': '采样帧率',
+  'Outline': '描边',
+  'Lock Palette': '锁定色板',
+  'Export .gpl': '导出 .gpl',
+  'Transparent BG': '透明背景',
+  'Auto Edge (flood-fill)': '自动边缘（泛洪填充）',
+  'Green Screen': '绿幕',
+  'White BG': '白底',
+  'Black BG': '黑底',
+  'BG Tolerance': '背景容差',
+  'Onion Skin': '洋葱皮',
+  'Download PNG': '下载 PNG',
+  'Compare Original': '对比原图',
+  '▶ Play': '▶ 播放',
+  '⏸ Pause': '⏸ 暂停',
+  'Download All Frames': '下载所有帧',
+  'Download GIF': '下载 GIF',
+  'Export JSON': '导出 JSON',
+  '+ Frame': '+ 添加帧',
+  '− Frame': '− 删除帧',
+  'Drop image(s) here or click to upload': '拖入图片到这里，或点击上传',
+  'Single: 1 image · Animation: multi-select PNGs': '单图：1 张 · 动画：多选 PNG',
+  'Drop video here or click to upload (mp4/webm)': '拖入视频到这里，或点击上传（mp4/webm）',
+  'Frame': '帧',
+  'AI Prompt': 'AI 提示词',
+  'Character Name': '角色名称',
+  'Action': '动作',
+  'Direction': '方向',
+  'Grid Size': '网格大小',
+  'Generate Prompt': '生成提示词',
+  'Copy Prompt': '复制提示词',
+  'Walk': '走路',
+  'Idle': '待机',
+  'Attack': '攻击',
+  'Jump': '跳跃',
+  'Hurt': '受伤',
+  'Die': '死亡',
+  'Down': '正面',
+  'Up': '背面',
+  'Left': '左',
+  'Right': '右',
+  'Down-Left': '左下',
+  'Down-Right': '右下',
+  'Up-Left': '左上',
+  'Up-Right': '右上',
+  'Pixelizer · 像素化 + 动作帧': 'Pixelizer · 像素化 + 动作帧'
+};
+
+let currentLang = localStorage.getItem('lang') || 'zh';
+
+function applyLang(lang) {
+  const map = lang === 'zh' ? I18N : {};
+  document.querySelectorAll('*').forEach(el => {
+    if (el.children.length === 0 && el.textContent.trim()) {
+      const txt = el.textContent.trim();
+      if (lang === 'zh' && I18N[txt]) {
+        el.dataset.orig = txt;
+        el.textContent = I18N[txt];
+      } else if (lang === 'en' && el.dataset.orig) {
+        el.textContent = el.dataset.orig;
+        delete el.dataset.orig;
+      }
+    }
+  });
+  // 按钮特殊处理
+  if (lang === 'zh') {
+    const playBtn = document.getElementById('play-btn');
+    if (playBtn && playBtn.textContent.trim() === '▶ Play') playBtn.textContent = '▶ 播放';
+    const pauseBtn = document.getElementById('play-btn');
+    if (pauseBtn && pauseBtn.textContent.trim() === '⏸ Pause') pauseBtn.textContent = '⏸ 暂停';
+  }
+}
+
+function toggleLang() {
+  currentLang = currentLang === 'zh' ? 'en' : 'zh';
+  localStorage.setItem('lang', currentLang);
+  applyLang(currentLang);
+}
+
+// 初始化
+if (currentLang === 'zh') applyLang('zh');
 </script>
 </body>
 </html>
