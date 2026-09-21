@@ -174,6 +174,7 @@ canvas { max-width: 100%; image-rendering: pixelated; image-rendering: crisp-edg
       <button class="btn btn-secondary" id="add-frame-btn" style="margin:0;flex:1">+ Frame</button>
       <button class="btn btn-secondary" id="del-frame-btn" style="margin:0;flex:1;color:var(--red)">− Frame</button>
     </div>
+    <button class="btn btn-secondary" id="export-sheet-btn" style="display:none;margin-top:6px">📦 Export Sprite Sheet</button>
   </div>
 
   <!-- Canvas -->
@@ -283,6 +284,7 @@ document.querySelectorAll('.mode-tab').forEach(tab => {
 function resetAll() {
   originalImgs = [];
   processedFrames = [];
+  frameDelays = [];
   currentFrame = 0;
   stopPlay();
   uploadZone.style.display = '';
@@ -293,6 +295,7 @@ function resetAll() {
   downloadFramesBtn.style.display = 'none';
   downloadGifBtn.style.display = 'none';
   exportJsonBtn.style.display = 'none';
+  exportSheetBtn.style.display = 'none';
   onionGroup.style.display = 'none';
   frameEditRow.style.display = 'none';
   frameStrip.innerHTML = '';
@@ -591,19 +594,25 @@ delFrameBtn.addEventListener('click', () => {
 
 function startPlay() {
   if (processedFrames.length < 2) return;
-  stopPlay(); // clear any previous interval first
+  stopPlay();
   playing = true;
   playBtn.textContent = '⏸ Pause';
   const fps = +fpsSlider.value;
-  playTimer = setInterval(() => {
+  const defaultDelay = 1000 / fps;
+  const tick = () => {
+    if (!playing) return;
     currentFrame = (currentFrame + 1) % processedFrames.length;
     renderFrame(currentFrame);
-  }, 1000 / fps);
+    const delay = frameDelays[currentFrame] || defaultDelay;
+    playTimer = setTimeout(tick, delay);
+  };
+  const firstDelay = frameDelays[0] || defaultDelay;
+  playTimer = setTimeout(tick, firstDelay);
 }
 function stopPlay() {
   playing = false;
   playBtn.textContent = '▶ Play';
-  if (playTimer) { clearInterval(playTimer); playTimer = null; }
+  if (playTimer) { clearTimeout(playTimer); playTimer = null; }
 }
 
 // ---- Process all frames ----
@@ -635,6 +644,7 @@ function processAll(opts = {}) {
     downloadFramesBtn.style.display = 'block';
     downloadGifBtn.style.display = 'block';
     exportJsonBtn.style.display = 'block';
+    exportSheetBtn.style.display = 'block';
     onionGroup.style.display = '';
     frameEditRow.style.display = 'flex';
     if (autoplay) startPlay(); else stopPlay();
@@ -787,6 +797,10 @@ function buildFrameStrip() {
       currentFrame = i;
       renderFrame(i);
     });
+    thumb.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      showCtxMenu(e.clientX, e.clientY, i);
+    });
     thumb.addEventListener('dragstart', e => {
       dragIdx = i;
       e.dataTransfer.effectAllowed = 'move';
@@ -804,6 +818,84 @@ function buildFrameStrip() {
   });
 }
 let dragIdx = null;
+let frameDelays = []; // per-frame delay in ms (0 = use global fps)
+
+// ---- Frame context menu (right-click) ----
+const ctxMenu = document.createElement('div');
+ctxMenu.style.cssText = 'position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px;z-index:9999;display:none;min-width:160px;box-shadow:0 4px 12px rgba(0,0,0,0.4)';
+document.body.appendChild(ctxMenu);
+let ctxFrameIdx = -1;
+
+function showCtxMenu(x, y, idx) {
+  ctxFrameIdx = idx;
+  const delay = frameDelays[idx] || 0;
+  ctxMenu.innerHTML = `
+    <div style="padding:6px 10px;cursor:pointer;font-size:12px;color:var(--text)" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''" onclick="flipFrame('h')">↔ Flip Horizontal</div>
+    <div style="padding:6px 10px;cursor:pointer;font-size:12px;color:var(--text)" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''" onclick="flipFrame('v')">↕ Flip Vertical</div>
+    <div style="padding:6px 10px;cursor:pointer;font-size:12px;color:var(--text)" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''" onclick="setFrameDelay()">⏱ Set Frame Delay (${delay ? delay+'ms' : 'default'})</div>
+  `;
+  ctxMenu.style.left = x + 'px';
+  ctxMenu.style.top = y + 'px';
+  ctxMenu.style.display = 'block';
+}
+document.addEventListener('click', () => { ctxMenu.style.display = 'none'; });
+
+function flipFrame(dir) {
+  const idx = ctxFrameIdx;
+  if (idx < 0 || !originalImgs[idx]) return;
+  const img = originalImgs[idx];
+  const cnv = document.createElement('canvas');
+  cnv.width = img.width; cnv.height = img.height;
+  const cctx = cnv.getContext('2d');
+  cctx.imageSmoothingEnabled = false;
+  cctx.save();
+  cctx.translate(dir === 'h' ? cnv.width : 0, dir === 'v' ? cnv.height : 0);
+  cctx.scale(dir === 'h' ? -1 : 1, dir === 'v' ? -1 : 1);
+  cctx.drawImage(img, 0, 0);
+  cctx.restore();
+  originalImgs[idx] = cnv;
+  processAll({ autoplay: false, keepFrame: true, keepFrameIdx: idx });
+  ctxMenu.style.display = 'none';
+}
+
+function setFrameDelay() {
+  const idx = ctxFrameIdx;
+  if (idx < 0) return;
+  const cur = frameDelays[idx] || 0;
+  const val = prompt('Frame delay in ms (0 = use global FPS):', cur);
+  if (val !== null) {
+    const ms = Math.max(0, parseInt(val) || 0);
+    if (ms === 0) delete frameDelays[idx];
+    else frameDelays[idx] = ms;
+  }
+  ctxMenu.style.display = 'none';
+}
+
+// ---- Sprite Sheet export ----
+const exportSheetBtn = document.getElementById('export-sheet-btn');
+exportSheetBtn.addEventListener('click', () => {
+  if (processedFrames.length < 2) return;
+  const n = processedFrames.length;
+  const cols = Math.ceil(Math.sqrt(n));
+  const rows = Math.ceil(n / cols);
+  const cellW = processedFrames[0].width;
+  const cellH = processedFrames[0].height;
+  const scale = +scaleSlider.value;
+  const sheet = document.createElement('canvas');
+  sheet.width = cols * cellW * scale;
+  sheet.height = rows * cellH * scale;
+  const sctx = sheet.getContext('2d');
+  sctx.imageSmoothingEnabled = false;
+  processedFrames.forEach((frame, i) => {
+    const r = Math.floor(i / cols);
+    const c = i % cols;
+    sctx.drawImage(frame, c * cellW * scale, r * cellH * scale, cellW * scale, cellH * scale);
+  });
+  const a = document.createElement('a');
+  a.download = 'sprite_sheet.png';
+  a.href = sheet.toDataURL('image/png');
+  a.click();
+});
 
 // ---- Algorithms (same as before) ----
 function medianCut(data, maxColors) {
