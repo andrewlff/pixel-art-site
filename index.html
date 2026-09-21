@@ -1082,64 +1082,101 @@ const I18N = {
   'Onion Skin': '洋葱皮',
   'Download PNG': '下载 PNG',
   'Compare Original': '对比原图',
+  'Show Pixelated': '显示像素化',
   '▶ Play': '▶ 播放',
   '⏸ Pause': '⏸ 暂停',
   'Download All Frames': '下载所有帧',
   'Download GIF': '下载 GIF',
   'Export JSON': '导出 JSON',
+  'Export Sprite Sheet': '导出 Sprite 图集',
   '+ Frame': '+ 添加帧',
   '− Frame': '− 删除帧',
   'Drop image(s) here or click to upload': '拖入图片到这里，或点击上传',
   'Single: 1 image · Animation: multi-select PNGs': '单图：1 张 · 动画：多选 PNG',
   'Drop video here or click to upload (mp4/webm)': '拖入视频到这里，或点击上传（mp4/webm）',
   'Frame': '帧',
-  'AI Prompt': 'AI 提示词',
-  'Character Name': '角色名称',
+  'AI Sprite Generator': 'AI Sprite 生成器',
+  'Character': '角色',
   'Action': '动作',
-  'Direction': '方向',
-  'Grid Size': '网格大小',
-  'Generate Prompt': '生成提示词',
-  'Copy Prompt': '复制提示词',
-  'Walk': '走路',
-  'Idle': '待机',
-  'Attack': '攻击',
+  'Directions': '方向',
+  'Character Name': '角色名称',
+  'Idle / Walk cycle': '待机 / 走路',
+  'Attack slash': '攻击挥砍',
   'Jump': '跳跃',
   'Hurt': '受伤',
-  'Die': '死亡',
-  'Down': '正面',
-  'Up': '背面',
-  'Left': '左',
-  'Right': '右',
-  'Down-Left': '左下',
-  'Down-Right': '右下',
-  'Up-Left': '左上',
-  'Up-Right': '右上',
-  'Pixelizer · 像素化 + 动作帧': 'Pixelizer · 像素化 + 动作帧'
+  'Death': '死亡',
+  'Cast spell': '施法',
+  'Single direction (1 row)': '单方向（1 行）',
+  '4 directions': '4 方向',
+  '8 directions': '8 方向',
+  '4×4 (16 frames)': '4×4（16 帧）',
+  '6×4 (24 frames)': '6×4（24 帧）',
+  '8×4 (32 frames)': '8×4（32 帧）',
+  '8×8 (64 frames)': '8×8（64 帧）',
+  'Generate Prompt': '生成提示词',
+  'Copy Prompt': '复制提示词',
+  '↔ Flip Horizontal': '↔ 水平翻转',
+  '↕ Flip Vertical': '↕ 垂直翻转',
+  '⏱ Set Frame Delay': '⏱ 设置帧延迟'
 };
 
 let currentLang = localStorage.getItem('lang') || 'zh';
 
-function applyLang(lang) {
-  const map = lang === 'zh' ? I18N : {};
-  document.querySelectorAll('*').forEach(el => {
-    if (el.children.length === 0 && el.textContent.trim()) {
-      const txt = el.textContent.trim();
-      if (lang === 'zh' && I18N[txt]) {
-        el.dataset.orig = txt;
-        el.textContent = I18N[txt];
-      } else if (lang === 'en' && el.dataset.orig) {
-        el.textContent = el.dataset.orig;
-        delete el.dataset.orig;
+function translateElement(el) {
+  // 处理 label：只替换第一个文本节点（保留 span.value）
+  if (el.tagName === 'LABEL') {
+    for (let node of el.childNodes) {
+      if (node.nodeType === 3 && node.textContent.trim()) {
+        const txt = node.textContent.trim();
+        if (I18N[txt]) {
+          if (!node.dataset.orig) node.dataset.orig = txt;
+          node.textContent = node.textContent.replace(txt, I18N[txt]);
+        } else if (node.dataset.orig && lang === 'en') {
+          node.textContent = node.textContent.replace(I18N[node.dataset.orig] || txt, node.dataset.orig);
+        }
+        break;
       }
     }
-  });
-  // 按钮特殊处理
-  if (lang === 'zh') {
-    const playBtn = document.getElementById('play-btn');
-    if (playBtn && playBtn.textContent.trim() === '▶ Play') playBtn.textContent = '▶ 播放';
-    const pauseBtn = document.getElementById('play-btn');
-    if (pauseBtn && pauseBtn.textContent.trim() === '⏸ Pause') pauseBtn.textContent = '⏸ 暂停';
+    return;
   }
+  // 处理 option
+  if (el.tagName === 'OPTION') {
+    const txt = el.textContent.trim();
+    if (I18N[txt]) {
+      if (!el.dataset.orig) el.dataset.orig = txt;
+      el.textContent = I18N[txt];
+    } else if (el.dataset.orig && lang === 'en') {
+      el.textContent = el.dataset.orig;
+    }
+    return;
+  }
+  // 处理纯文本叶子节点
+  if (el.children.length === 0 && el.textContent.trim()) {
+    const txt = el.textContent.trim();
+    if (I18N[txt]) {
+      if (!el.dataset.orig) el.dataset.orig = txt;
+      el.textContent = I18N[txt];
+    } else if (el.dataset.orig && lang === 'en') {
+      el.textContent = el.dataset.orig;
+    }
+  }
+}
+
+function applyLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('label, option, .mode-tab, .toggle-row span, .btn, .control-group label, .upload-zone .text, .upload-zone .hint, .ai-panel label, .ai-panel option, .ai-panel h2, .ai-panel p, .frame-info').forEach(el => {
+    translateElement(el);
+  });
+  // 处理 toggle-row 里的 span
+  document.querySelectorAll('.toggle-row > span').forEach(span => {
+    const txt = span.textContent.trim();
+    if (I18N[txt]) {
+      if (!span.dataset.orig) span.dataset.orig = txt;
+      span.textContent = I18N[txt];
+    } else if (span.dataset.orig && lang === 'en') {
+      span.textContent = span.dataset.orig;
+    }
+  });
 }
 
 function toggleLang() {
