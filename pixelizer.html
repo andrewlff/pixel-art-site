@@ -89,6 +89,7 @@ canvas { max-width: 100%; image-rendering: pixelated; image-rendering: crisp-edg
 <div class="mode-tabs">
   <div class="mode-tab active" data-mode="single">Single Image</div>
   <div class="mode-tab" data-mode="animation">Animation Frames</div>
+  <div class="mode-tab" data-mode="ai">AI Generate</div>
 </div>
 
 <div class="main">
@@ -97,6 +98,12 @@ canvas { max-width: 100%; image-rendering: pixelated; image-rendering: crisp-edg
     <div class="control-group">
       <label>Grid Size <span class="value" id="grid-val">64</span></label>
       <input type="range" id="grid" min="8" max="128" value="64">
+      <div style="display:flex;gap:4px;margin-top:6px" id="preset-row">
+        <button class="btn btn-secondary preset-btn" data-grid="16" style="margin:0;padding:4px;font-size:10px;flex:1">16</button>
+        <button class="btn btn-secondary preset-btn" data-grid="32" style="margin:0;padding:4px;font-size:10px;flex:1">32</button>
+        <button class="btn btn-secondary preset-btn" data-grid="48" style="margin:0;padding:4px;font-size:10px;flex:1">48</button>
+        <button class="btn btn-secondary preset-btn" data-grid="64" style="margin:0;padding:4px;font-size:10px;flex:1">64</button>
+      </div>
     </div>
     <div class="control-group">
       <label>Colors <span class="value" id="colors-val">32</span></label>
@@ -111,22 +118,58 @@ canvas { max-width: 100%; image-rendering: pixelated; image-rendering: crisp-edg
       <label>FPS <span class="value" id="fps-val">8</span></label>
       <input type="range" id="fps" min="1" max="24" value="8">
     </div>
+    <div class="control-group" id="split-group" style="display:none">
+      <div class="toggle-row"><span>Split Sheet</span><div class="toggle" id="split-toggle"></div></div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <div style="flex:1">
+          <label style="font-size:10px;color:var(--text-dim)">Cols</label>
+          <input type="number" id="split-cols" min="1" max="16" value="4" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:4px 6px;font-family:inherit">
+        </div>
+        <div style="flex:1">
+          <label style="font-size:10px;color:var(--text-dim)">Rows</label>
+          <input type="number" id="split-rows" min="1" max="16" value="4" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:4px 6px;font-family:inherit">
+        </div>
+      </div>
+    </div>
+    <div class="control-group" id="video-group" style="display:none">
+      <label>Sample FPS <span class="value" id="sample-fps-val">8</span></label>
+      <input type="range" id="sample-fps" min="1" max="30" value="8">
+    </div>
 
     <div class="control-group">
       <div class="toggle-row"><span>Outline</span><div class="toggle on" id="outline-toggle"></div></div>
     </div>
     <div class="control-group">
+      <div class="toggle-row"><span>Lock Palette</span><div class="toggle" id="palette-toggle"></div></div>
+      <button class="btn btn-secondary" id="export-palette-btn" style="margin-top:6px;font-size:11px;padding:6px;display:none">Export .gpl</button>
+    </div>
+    <div class="control-group">
       <div class="toggle-row"><span>Transparent BG</span><div class="toggle" id="transparent-toggle"></div></div>
+      <select id="bg-mode" style="display:none;width:100%;margin-top:6px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:5px;font-family:inherit;font-size:12px">
+        <option value="auto">Auto Edge (flood-fill)</option>
+        <option value="green">Green Screen</option>
+        <option value="white">White BG</option>
+        <option value="black">Black BG</option>
+      </select>
     </div>
     <div class="control-group" id="tol-group" style="display:none">
       <label>BG Tolerance <span class="value" id="tol-val">40</span></label>
       <input type="range" id="tol" min="5" max="150" value="40">
+    </div>
+    <div class="control-group" id="onion-group" style="display:none">
+      <div class="toggle-row"><span>Onion Skin</span><div class="toggle" id="onion-toggle"></div></div>
     </div>
 
     <button class="btn btn-primary" id="download-btn" style="display:none">Download PNG</button>
     <button class="btn btn-secondary" id="compare-btn" style="display:none">Compare Original</button>
     <button class="btn btn-green" id="play-btn" style="display:none">▶ Play</button>
     <button class="btn btn-secondary" id="download-frames-btn" style="display:none">Download All Frames</button>
+    <button class="btn btn-secondary" id="download-gif-btn" style="display:none">Download GIF</button>
+    <button class="btn btn-secondary" id="export-json-btn" style="display:none">Export JSON</button>
+    <div style="display:none;gap:6px;margin-top:6px" id="frame-edit-row">
+      <button class="btn btn-secondary" id="add-frame-btn" style="margin:0;flex:1">+ Frame</button>
+      <button class="btn btn-secondary" id="del-frame-btn" style="margin:0;flex:1;color:var(--red)">− Frame</button>
+    </div>
   </div>
 
   <!-- Canvas -->
@@ -144,7 +187,50 @@ canvas { max-width: 100%; image-rendering: pixelated; image-rendering: crisp-edg
   </div>
 </div>
 
-<input type="file" class="hidden-input" id="file-input" accept="image/*" multiple>
+<!-- AI Generate Panel -->
+<div class="ai-panel" id="ai-panel" style="display:none;max-width:700px;margin:40px auto;padding:0 24px">
+  <h2 style="font-size:16px;margin-bottom:16px">AI Sprite Generator <span style="color:var(--accent)">· 提示词引导</span></h2>
+  <p style="font-size:12px;color:var(--text-dim);margin-bottom:20px">填写角色和动作，生成标准提示词。复制到豆包/即梦/Nano Banana 生成 sprite sheet，再回到 Animation Frames 模式 Split Sheet 切帧。</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+    <div>
+      <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:6px">Character</label>
+      <input type="text" id="ai-char" placeholder="e.g. fire mage in red robes" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px;font-family:inherit">
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:6px">Action</label>
+      <select id="ai-action" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px;font-family:inherit">
+        <option value="idle walk cycle">Idle / Walk cycle</option>
+        <option value="attack slash">Attack slash</option>
+        <option value="jump">Jump</option>
+        <option value="hurt">Hurt</option>
+        <option value="death">Death</option>
+        <option value="cast spell">Cast spell</option>
+      </select>
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:6px">Directions</label>
+      <select id="ai-dir" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px;font-family:inherit">
+        <option value="1 row">Single direction (1 row)</option>
+        <option value="4 rows: up, down, left, right">4 directions</option>
+        <option value="8 rows: all 8 compass directions">8 directions</option>
+      </select>
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:6px">Grid</label>
+      <select id="ai-grid" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px;font-family:inherit">
+        <option value="4x4">4×4 (16 frames)</option>
+        <option value="6x4">6×4 (24 frames)</option>
+        <option value="8x4">8×4 (32 frames)</option>
+        <option value="8x8">8×8 (64 frames)</option>
+      </select>
+    </div>
+  </div>
+  <button class="btn btn-primary" id="ai-gen-btn" style="margin-bottom:16px">Generate Prompt</button>
+  <textarea id="ai-output" readonly style="width:100%;height:180px;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:12px;font-family:inherit;font-size:12px;line-height:1.5"></textarea>
+  <button class="btn btn-secondary" id="ai-copy-btn" style="margin-top:8px">📋 Copy Prompt</button>
+</div>
+
+<input type="file" class="hidden-input" id="file-input" accept="image/*,video/*" multiple>
 
 <script>
 const uploadZone = document.getElementById('upload-zone');
@@ -167,6 +253,7 @@ const tolVal = document.getElementById('tol-val');
 
 let mode = 'single';
 let originalImgs = []; // array of Image
+let cachedFiles = []; // raw File objects for re-split
 let processedFrames = []; // array of canvas (small pixel canvases)
 let currentFrame = 0;
 let playing = false;
@@ -179,8 +266,13 @@ document.querySelectorAll('.mode-tab').forEach(tab => {
     document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
     mode = tab.dataset.mode;
-    fpsGroup.style.display = mode === 'animation' ? '' : 'none';
-    resetAll();
+    const isAI = mode === 'ai';
+    document.querySelector('.main').style.display = isAI ? 'none' : 'grid';
+    document.getElementById('ai-panel').style.display = isAI ? 'block' : 'none';
+    fpsGroup.style.display = (!isAI && mode === 'animation') ? '' : 'none';
+    splitGroup.style.display = (!isAI && mode === 'animation') ? '' : 'none';
+    videoGroup.style.display = (!isAI && mode === 'animation') ? '' : 'none';
+    if (!isAI) resetAll();
   });
 });
 
@@ -195,6 +287,10 @@ function resetAll() {
   compareBtn.style.display = 'none';
   playBtn.style.display = 'none';
   downloadFramesBtn.style.display = 'none';
+  downloadGifBtn.style.display = 'none';
+  exportJsonBtn.style.display = 'none';
+  onionGroup.style.display = 'none';
+  frameEditRow.style.display = 'none';
   frameStrip.innerHTML = '';
   frameInfo.textContent = '';
   fileInput.value = '';
@@ -217,21 +313,105 @@ fileInput.addEventListener('change', e => {
 
 function loadFiles(files) {
   if (mode === 'single') files = files.slice(0, 1);
-  let loaded = 0;
+  cachedFiles = Array.from(files);
+  loadFilesFromCache();
+}
+
+function loadFilesFromCache() {
+  let files = cachedFiles.slice();
+  if (mode === 'single') files = files.slice(0, 1);
   originalImgs = [];
-  files.forEach(file => {
+
+  const videos = files.filter(f => f.type.startsWith('video/'));
+  const images = files.filter(f => !f.type.startsWith('video/'));
+
+  const finish = () => { processAll(); };
+
+  if (videos.length) {
+    const sampleFps = +sampleFpsSlider.value;
+    Promise.all(videos.map(v => extractFramesFromVideo(v, sampleFps))).then(frameArrays => {
+      frameArrays.forEach(arr => originalImgs.push(...arr));
+      loadImages(images, finish);
+    });
+  } else {
+    loadImages(images, finish);
+  }
+}
+
+function loadImages(images, finish) {
+  if (!images.length) { finish(); return; }
+  let loaded = 0;
+  images.forEach(file => {
     const reader = new FileReader();
     reader.onload = e => {
       const img = new Image();
       img.onload = () => {
-        originalImgs.push(img);
         loaded++;
-        if (loaded === files.length) processAll();
+        if (mode === 'animation' && splitEnabled && images.length === 1) {
+          const cols = Math.max(1, +splitCols.value);
+          const rows = Math.max(1, +splitRows.value);
+          originalImgs = originalImgs.concat(splitSheet(img, cols, rows));
+        } else {
+          originalImgs.push(img);
+        }
+        if (loaded === images.length) finish();
       };
       img.src = e.target.result;
     };
     reader.readAsDataURL(file);
   });
+}
+
+function extractFramesFromVideo(file, sampleFps) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const video = document.createElement('video');
+    video.src = url;
+    video.muted = true;
+    video.preload = 'auto';
+    video.crossOrigin = 'anonymous';
+    video.addEventListener('loadedmetadata', () => {
+      const duration = video.duration;
+      const interval = 1 / sampleFps;
+      const times = [];
+      for (let t = 0; t < duration - 0.05; t += interval) times.push(t);
+      if (!times.length) times.push(0);
+      const frames = [];
+      let idx = 0;
+      const grabNext = () => {
+        if (idx >= times.length) { URL.revokeObjectURL(url); resolve(frames); return; }
+        video.currentTime = times[idx];
+        idx++;
+      };
+      video.addEventListener('seeked', () => {
+        const cnv = document.createElement('canvas');
+        cnv.width = video.videoWidth;
+        cnv.height = video.videoHeight;
+        cnv.getContext('2d').drawImage(video, 0, 0);
+        frames.push(cnv);
+        grabNext();
+      });
+      grabNext();
+    });
+    video.addEventListener('error', () => { URL.revokeObjectURL(url); reject(new Error('video decode error')); });
+  });
+}
+
+function splitSheet(img, cols, rows) {
+  const fw = Math.floor(img.width / cols);
+  const fh = Math.floor(img.height / rows);
+  const frames = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cnv = document.createElement('canvas');
+      cnv.width = fw; cnv.height = fh;
+      const cctx = cnv.getContext('2d');
+      cctx.imageSmoothingEnabled = false;
+      cctx.drawImage(img, c*fw, r*fh, fw, fh, 0, 0, fw, fh);
+      frames.push(cnv);
+    }
+  }
+  return frames;
 }
 
 // ---- Controls ----
@@ -240,21 +420,76 @@ const colorsSlider = document.getElementById('colors');
 const scaleSlider = document.getElementById('scale');
 const outlineToggle = document.getElementById('outline-toggle');
 const transparentToggle = document.getElementById('transparent-toggle');
+const bgModeSelect = document.getElementById('bg-mode');
 
-let outlineEnabled = true, transparentEnabled = false;
+let outlineEnabled = true, transparentEnabled = false, onionEnabled = false, paletteEnabled = false;
+let lockedPalette = null; // array of [r,g,b]
+
+const onionToggle = document.getElementById('onion-toggle');
+const onionGroup = document.getElementById('onion-group');
+const downloadGifBtn = document.getElementById('download-gif-btn');
+const paletteToggle = document.getElementById('palette-toggle');
+const exportPaletteBtn = document.getElementById('export-palette-btn');
+const exportJsonBtn = document.getElementById('export-json-btn');
+const addFrameBtn = document.getElementById('add-frame-btn');
+const delFrameBtn = document.getElementById('del-frame-btn');
+const frameEditRow = document.getElementById('frame-edit-row');
+const splitToggle = document.getElementById('split-toggle');
+const splitGroup = document.getElementById('split-group');
+const splitCols = document.getElementById('split-cols');
+const splitRows = document.getElementById('split-rows');
+let splitEnabled = false;
+const videoGroup = document.getElementById('video-group');
+const sampleFpsSlider = document.getElementById('sample-fps');
 
 [gridSlider, colorsSlider, scaleSlider, fpsSlider, tolSlider].forEach(el => {
   el.addEventListener('input', () => {
     document.getElementById(el.id + '-val').textContent = el.value;
+    if (el.id === 'grid' || el.id === 'colors') lockedPalette = null;
     if (originalImgs.length) processAll();
   });
+});
+sampleFpsSlider.addEventListener('input', () => {
+  document.getElementById('sample-fps-val').textContent = sampleFpsSlider.value;
 });
 outlineToggle.addEventListener('click', () => { outlineEnabled = !outlineEnabled; outlineToggle.classList.toggle('on', outlineEnabled); if (originalImgs.length) processAll(); });
 transparentToggle.addEventListener('click', () => {
   transparentEnabled = !transparentEnabled;
   transparentToggle.classList.toggle('on', transparentEnabled);
   tolGroup.style.display = transparentEnabled ? '' : 'none';
+  bgModeSelect.style.display = transparentEnabled ? 'block' : 'none';
   if (originalImgs.length) processAll();
+});
+bgModeSelect.addEventListener('change', () => { if (originalImgs.length) processAll(); });
+onionToggle.addEventListener('click', () => {
+  onionEnabled = !onionEnabled;
+  onionToggle.classList.toggle('on', onionEnabled);
+  renderFrame(currentFrame);
+});
+splitToggle.addEventListener('click', () => {
+  splitEnabled = !splitEnabled;
+  splitToggle.classList.toggle('on', splitEnabled);
+  if (originalImgs.length) loadFilesFromCache();
+});
+paletteToggle.addEventListener('click', () => {
+  paletteEnabled = !paletteEnabled;
+  paletteToggle.classList.toggle('on', paletteEnabled);
+  if (!paletteEnabled) lockedPalette = null;
+  exportPaletteBtn.style.display = paletteEnabled ? 'block' : 'none';
+  if (originalImgs.length) processAll();
+});
+exportPaletteBtn.addEventListener('click', exportGPL);
+exportJsonBtn.addEventListener('click', exportJSON);
+document.querySelectorAll('.preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    gridSlider.value = btn.dataset.grid;
+    document.getElementById('grid-val').textContent = btn.dataset.grid;
+    lockedPalette = null;
+    if (originalImgs.length) processAll();
+  });
+});
+[splitCols, splitRows].forEach(el => {
+  el.addEventListener('change', () => { if (originalImgs.length && splitEnabled) loadFilesFromCache(); });
 });
 
 downloadBtn.addEventListener('click', () => {
@@ -291,8 +526,68 @@ downloadFramesBtn.addEventListener('click', () => {
   });
 });
 
+// GIF export (simple: use gif.js via CDN)
+downloadGifBtn.addEventListener('click', async () => {
+  if (processedFrames.length < 2) return;
+  // Dynamically load gif.js
+  if (!window.GIF) {
+    await new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.js';
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+    // Load worker
+    await new Promise((res, rej) => {
+      const w = document.createElement('script');
+      w.src = 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js';
+      w.onload = res; w.onerror = rej;
+      document.head.appendChild(w);
+    });
+  }
+  const scale = +scaleSlider.value;
+  const fps = +fpsSlider.value;
+  const gif = new GIF({
+    workers: 2, quality: 10,
+    width: processedFrames[0].width * scale,
+    height: processedFrames[0].height * scale,
+    workerScript: 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js'
+  });
+  processedFrames.forEach(frame => {
+    const c = document.createElement('canvas');
+    c.width = frame.width * scale; c.height = frame.height * scale;
+    c.getContext('2d').drawImage(frame, 0, 0, c.width, c.height);
+    gif.addFrame(c, {delay: 1000/fps, copy: true});
+  });
+  downloadGifBtn.textContent = 'Encoding...';
+  gif.on('finished', blob => {
+    const a = document.createElement('a');
+    a.download = 'animation.gif';
+    a.href = URL.createObjectURL(blob);
+    a.click();
+    downloadGifBtn.textContent = 'Download GIF';
+  });
+  gif.render();
+});
+
+// Frame add/delete
+addFrameBtn.addEventListener('click', () => {
+  if (!originalImgs.length) return;
+  const src = originalImgs[currentFrame] || originalImgs[0];
+  const newIdx = currentFrame + 1;
+  originalImgs.splice(newIdx, 0, src);
+  processAll({ autoplay: false, keepFrame: true, keepFrameIdx: newIdx });
+});
+delFrameBtn.addEventListener('click', () => {
+  if (originalImgs.length <= 1) return;
+  originalImgs.splice(currentFrame, 1);
+  const newIdx = Math.max(0, currentFrame - 1);
+  processAll({ autoplay: false, keepFrame: true, keepFrameIdx: newIdx });
+});
+
 function startPlay() {
   if (processedFrames.length < 2) return;
+  stopPlay(); // clear any previous interval first
   playing = true;
   playBtn.textContent = '⏸ Pause';
   const fps = +fpsSlider.value;
@@ -308,10 +603,23 @@ function stopPlay() {
 }
 
 // ---- Process all frames ----
-function processAll() {
-  processedFrames = originalImgs.map(img => processOne(img));
-  currentFrame = 0;
-  renderFrame(0);
+function processAll(opts = {}) {
+  const { autoplay = true, keepFrame = false, keepFrameIdx = null } = opts;
+  const savedFrame = currentFrame;
+  processedFrames = originalImgs.map((img, idx) => {
+    const frame = processOne(img, idx === 0);
+    return frame;
+  });
+  if (paletteEnabled && !lockedPalette && processedFrames.length) {
+    lockedPalette = extractPalette(processedFrames[0]);
+  }
+  if (keepFrame) {
+    const target = keepFrameIdx !== null ? keepFrameIdx : savedFrame;
+    currentFrame = Math.max(0, Math.min(target, processedFrames.length - 1));
+  } else {
+    currentFrame = 0;
+  }
+  renderFrame(currentFrame);
   buildFrameStrip();
   uploadZone.style.display = 'none';
   canvasWrap.style.display = 'block';
@@ -321,15 +629,23 @@ function processAll() {
   if (mode === 'animation' && processedFrames.length > 1) {
     playBtn.style.display = 'block';
     downloadFramesBtn.style.display = 'block';
-    startPlay();
+    downloadGifBtn.style.display = 'block';
+    exportJsonBtn.style.display = 'block';
+    onionGroup.style.display = '';
+    frameEditRow.style.display = 'flex';
+    if (autoplay) startPlay(); else stopPlay();
   } else {
     playBtn.style.display = 'none';
     downloadFramesBtn.style.display = 'none';
+    downloadGifBtn.style.display = 'none';
+    exportJsonBtn.style.display = 'none';
+    onionGroup.style.display = 'none';
+    frameEditRow.style.display = 'none';
     stopPlay();
   }
 }
 
-function processOne(img) {
+function processOne(img, isFirstFrame) {
   const grid = +gridSlider.value;
   const numColors = +colorsSlider.value;
 
@@ -341,13 +657,17 @@ function processOne(img) {
   const imgData = tctx.getImageData(0, 0, tmp.width, tmp.height);
   const px = imgData.data;
 
-  // Quantize
-  const colorMap = medianCut(px, numColors);
-  for (let i = 0; i < px.length; i += 4) {
-    const key = (px[i] << 16) | (px[i+1] << 8) | px[i+2];
-    if (colorMap.has(key)) {
-      const c = colorMap.get(key);
-      px[i] = c[0]; px[i+1] = c[1]; px[i+2] = c[2];
+  // Quantize: use locked palette if available, else median-cut
+  if (paletteEnabled && lockedPalette && lockedPalette.length) {
+    matchToPalette(px, lockedPalette);
+  } else {
+    const colorMap = medianCut(px, numColors);
+    for (let i = 0; i < px.length; i += 4) {
+      const key = (px[i] << 16) | (px[i+1] << 8) | px[i+2];
+      if (colorMap.has(key)) {
+        const c = colorMap.get(key);
+        px[i] = c[0]; px[i+1] = c[1]; px[i+2] = c[2];
+      }
     }
   }
   tctx.putImageData(imgData, 0, 0);
@@ -358,6 +678,71 @@ function processOne(img) {
   return tmp;
 }
 
+function matchToPalette(px, palette) {
+  for (let i = 0; i < px.length; i += 4) {
+    let best = 0, bestDist = Infinity;
+    for (let p = 0; p < palette.length; p++) {
+      const dr = px[i]-palette[p][0], dg = px[i+1]-palette[p][1], db = px[i+2]-palette[p][2];
+      const d = dr*dr + dg*dg + db*db;
+      if (d < bestDist) { bestDist = d; best = p; }
+    }
+    px[i] = palette[best][0]; px[i+1] = palette[best][1]; px[i+2] = palette[best][2];
+  }
+}
+
+function extractPalette(canvas) {
+  const ctx = canvas.getContext('2d');
+  const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+  const seen = new Map();
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i+3] < 128) continue;
+    const key = (data[i]<<16)|(data[i+1]<<8)|data[i+2];
+    if (!seen.has(key)) seen.set(key, [data[i], data[i+1], data[i+2]]);
+  }
+  return Array.from(seen.values());
+}
+
+function exportGPL() {
+  if (!lockedPalette) return;
+  let txt = 'GIMP Palette\nName: Pixelizer Palette\n#\n';
+  lockedPalette.forEach(c => {
+    txt += `  ${c[0]}   ${c[1]}   ${c[2]}\n`;
+  });
+  const blob = new Blob([txt], {type: 'text/plain'});
+  const a = document.createElement('a');
+  a.download = 'palette.gpl';
+  a.href = URL.createObjectURL(blob);
+  a.click();
+}
+
+function exportJSON() {
+  if (!processedFrames.length) return;
+  const fps = +fpsSlider.value || 8;
+  const cellW = processedFrames[0].width;
+  const cellH = processedFrames[0].height;
+  const n = processedFrames.length;
+  const frames = [];
+  for (let i = 0; i < n; i++) {
+    frames.push({rect: [0, 0, cellW, cellH]});
+  }
+  const manifest = {
+    type: "pixel_art_batch_sprite_sheet",
+    cols: n,
+    rows: 1,
+    cell_w: cellW,
+    cell_h: cellH,
+    frame_ms: Math.round(1000 / fps),
+    loop: true,
+    alpha: true,
+    frames: frames
+  };
+  const blob = new Blob([JSON.stringify(manifest, null, 2)], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.download = 'sprite_manifest.json';
+  a.href = URL.createObjectURL(blob);
+  a.click();
+}
+
 function renderFrame(idx) {
   if (!processedFrames.length) return;
   const frame = processedFrames[idx];
@@ -365,9 +750,19 @@ function renderFrame(idx) {
   canvas.width = frame.width * scale;
   canvas.height = frame.height * scale;
   ctx.imageSmoothingEnabled = false;
+
+  // Onion skin: draw prev/next frames at 30% opacity
+  if (onionEnabled && processedFrames.length > 1) {
+    const prev = processedFrames[(idx - 1 + processedFrames.length) % processedFrames.length];
+    const next = processedFrames[(idx + 1) % processedFrames.length];
+    ctx.globalAlpha = 0.25;
+    ctx.drawImage(prev, 0, 0, canvas.width, canvas.height);
+    ctx.globalAlpha = 0.35;
+    ctx.drawImage(next, 0, 0, canvas.width, canvas.height);
+    ctx.globalAlpha = 1.0;
+  }
   ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
   frameInfo.textContent = `Frame ${idx + 1} / ${processedFrames.length}`;
-  // Highlight thumb
   frameStrip.querySelectorAll('.frame-thumb').forEach((t, i) => t.classList.toggle('active', i === idx));
 }
 
@@ -376,6 +771,8 @@ function buildFrameStrip() {
   processedFrames.forEach((frame, i) => {
     const thumb = document.createElement('div');
     thumb.className = 'frame-thumb' + (i === 0 ? ' active' : '');
+    thumb.draggable = true;
+    thumb.dataset.idx = i;
     const tc = document.createElement('canvas');
     const s = Math.max(1, Math.floor(48 / frame.width));
     tc.width = frame.width * s;
@@ -386,9 +783,23 @@ function buildFrameStrip() {
       currentFrame = i;
       renderFrame(i);
     });
+    thumb.addEventListener('dragstart', e => {
+      dragIdx = i;
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    thumb.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+    thumb.addEventListener('drop', e => {
+      e.preventDefault();
+      const dropIdx = +thumb.dataset.idx;
+      if (dragIdx === dropIdx || dragIdx == null) return;
+      const [moved] = originalImgs.splice(dragIdx, 1);
+      originalImgs.splice(dropIdx, 0, moved);
+      processAll({ autoplay: false, keepFrame: true, keepFrameIdx: dropIdx });
+    });
     frameStrip.appendChild(thumb);
   });
 }
+let dragIdx = null;
 
 // ---- Algorithms (same as before) ----
 function medianCut(data, maxColors) {
@@ -429,40 +840,60 @@ function medianCut(data, maxColors) {
 function removeBackground(ctx, w, h) {
   const imgData = ctx.getImageData(0, 0, w, h);
   const px = imgData.data;
-  const TOL = +tolSlider.value;
+  const mode = bgModeSelect.value;
 
-  // Sample all edge pixels, find dominant (most common) color
-  const edgeColors = new Map();
-  const edgePoints = [];
-  for (let x = 0; x < w; x++) { edgePoints.push([x,0],[x,h-1]); }
-  for (let y = 0; y < h; y++) { edgePoints.push([0,y],[w-1,y]); }
-  edgePoints.forEach(([x,y]) => {
-    const i = (y*w+x)*4;
-    const key = (px[i]<<16)|(px[i+1]<<8)|px[i+2];
-    edgeColors.set(key, (edgeColors.get(key)||0)+1);
-  });
-  // Pick the most frequent edge color as background
-  let bgKey = 0, bgCount = 0;
-  edgeColors.forEach((count, key) => { if (count > bgCount) { bgCount = count; bgKey = key; } });
-  const br = (bgKey >> 16) & 0xff, bgc = (bgKey >> 8) & 0xff, bb = bgKey & 0xff;
-
-  // Flood-fill from edges
-  const visited = new Uint8Array(w*h);
-  const stack = [];
-  for (let x=0;x<w;x++){stack.push([x,0],[x,h-1]);}
-  for (let y=0;y<h;y++){stack.push([0,y],[w-1,y]);}
-  while (stack.length) {
-    const [x,y] = stack.pop();
-    if (x<0||x>=w||y<0||y>=h) continue;
-    const idx = y*w+x;
-    if (visited[idx]) continue;
-    visited[idx] = 1;
-    const i = idx*4;
-    if (px[i+3] < 10) continue;
-    const dr=px[i]-br, dg=px[i+1]-bgc, db=px[i+2]-bb;
-    if (Math.sqrt(dr*dr+dg*dg+db*db) < TOL) {
-      px[i+3] = 0;
-      stack.push([x+1,y],[x-1,y],[x,y+1],[x,y-1]);
+  if (mode === 'green') {
+    // Green screen: pixels where green dominates become transparent, plus spill suppression
+    for (let i = 0; i < px.length; i += 4) {
+      const r = px[i], g = px[i+1], b = px[i+2];
+      if (g > r + 25 && g > b + 25) {
+        px[i+3] = 0;
+      } else if (g > r && g > b) {
+        // Spill suppression: clamp green to max of other channels
+        const m = Math.max(r, b);
+        px[i+1] = m;
+      }
+    }
+  } else if (mode === 'white') {
+    for (let i = 0; i < px.length; i += 4) {
+      if (px[i] > 200 && px[i+1] > 200 && px[i+2] > 200) px[i+3] = 0;
+    }
+  } else if (mode === 'black') {
+    for (let i = 0; i < px.length; i += 4) {
+      if (px[i] < 40 && px[i+1] < 40 && px[i+2] < 40) px[i+3] = 0;
+    }
+  } else {
+    // Auto: flood-fill from edges using dominant edge color
+    const TOL = +tolSlider.value;
+    const edgeColors = new Map();
+    const edgePoints = [];
+    for (let x = 0; x < w; x++) { edgePoints.push([x,0],[x,h-1]); }
+    for (let y = 0; y < h; y++) { edgePoints.push([0,y],[w-1,y]); }
+    edgePoints.forEach(([x,y]) => {
+      const i = (y*w+x)*4;
+      const key = (px[i]<<16)|(px[i+1]<<8)|px[i+2];
+      edgeColors.set(key, (edgeColors.get(key)||0)+1);
+    });
+    let bgKey = 0, bgCount = 0;
+    edgeColors.forEach((count, key) => { if (count > bgCount) { bgCount = count; bgKey = key; } });
+    const br = (bgKey >> 16) & 0xff, bgc = (bgKey >> 8) & 0xff, bb = bgKey & 0xff;
+    const visited = new Uint8Array(w*h);
+    const stack = [];
+    for (let x=0;x<w;x++){stack.push([x,0],[x,h-1]);}
+    for (let y=0;y<h;y++){stack.push([0,y],[w-1,y]);}
+    while (stack.length) {
+      const [x,y] = stack.pop();
+      if (x<0||x>=w||y<0||y>=h) continue;
+      const idx = y*w+x;
+      if (visited[idx]) continue;
+      visited[idx] = 1;
+      const i = idx*4;
+      if (px[i+3] < 10) continue;
+      const dr=px[i]-br, dg=px[i+1]-bgc, db=px[i+2]-bb;
+      if (Math.sqrt(dr*dr+dg*dg+db*db) < TOL) {
+        px[i+3] = 0;
+        stack.push([x+1,y],[x-1,y],[x,y+1],[x,y-1]);
+      }
     }
   }
   ctx.putImageData(imgData, 0, 0);
@@ -494,6 +925,40 @@ function applyOutline(ctx, w, h) {
   }
   ctx.putImageData(imgData, 0, 0);
 }
+
+// ---- AI Generate ----
+const aiChar = document.getElementById('ai-char');
+const aiAction = document.getElementById('ai-action');
+const aiDir = document.getElementById('ai-dir');
+const aiGrid = document.getElementById('ai-grid');
+const aiGenBtn = document.getElementById('ai-gen-btn');
+const aiOutput = document.getElementById('ai-output');
+const aiCopyBtn = document.getElementById('ai-copy-btn');
+
+aiGenBtn.addEventListener('click', () => {
+  const ch = aiChar.value.trim() || 'a fantasy warrior';
+  const act = aiAction.value;
+  const dir = aiDir.value;
+  const grid = aiGrid.value;
+  const [cols, rows] = grid.split('x').map(Number);
+  const prompt = `Create a pixel art sprite sheet for a game character: ${ch}.
+
+Action: ${act}.
+Directions: ${dir}.
+Layout: ${cols} columns × ${rows} rows uniform grid, each cell a separate frame of the animation, character centered in each cell, consistent appearance across all frames.
+
+Style: retro 16-bit pixel art, clean outlines, limited color palette, transparent or plain solid background, no text, no watermark.
+Output: a single PNG sprite sheet image.`;
+  aiOutput.value = prompt;
+});
+
+aiCopyBtn.addEventListener('click', () => {
+  if (!aiOutput.value) aiGenBtn.click();
+  navigator.clipboard.writeText(aiOutput.value).then(() => {
+    aiCopyBtn.textContent = '✓ Copied!';
+    setTimeout(() => aiCopyBtn.textContent = '📋 Copy Prompt', 1500);
+  });
+});
 </script>
 </body>
 </html>

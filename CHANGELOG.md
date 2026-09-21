@@ -2,6 +2,23 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+## [Unreleased] — 2026-09-21
+
+### Added
+- Split Sheet：上传大网格图，按 Cols×Rows 自动切帧
+- 视频抽帧：直接拖 mp4 上传，Sample FPS 控制采样率
+- Lock Palette：首帧色板固化，后续帧复用，导出 .gpl
+- 标准尺寸预设：16/32/48/64 一键设置
+- Export JSON：帧清单（cols/rows/cell_w/cell_h/frame_ms/frames[i].rect），直导 Godot/Unity
+- 去背模式：Auto / Green Screen（含溢色抑制）/ White / Black
+- 帧拖拽排序：底部帧条直接拖动换顺序
+- AI Generate tab：角色+动作+方向+网格 → 标准提示词一键复制
+
+### Fixed
+- 暂停不可用：多次 processAll 叠加 setInterval，startPlay 开头先 stopPlay 清旧定时器
+- 加帧/减帧/拖帧后不自动播放，且保持当前帧位置
+- frame-edit-row 重复 style 属性导致 Single 模式误显示 +Frame/−Frame
+
 ## [Unreleased] — 2026-09-19
 
 ### Added
