@@ -1131,7 +1131,7 @@ function translateElement(el) {
         if (I18N[txt]) {
           if (!node.dataset.orig) node.dataset.orig = txt;
           node.textContent = node.textContent.replace(txt, I18N[txt]);
-        } else if (node.dataset.orig && lang === 'en') {
+        } else if (node.dataset.orig && currentLang === 'en') {
           node.textContent = node.textContent.replace(I18N[node.dataset.orig] || txt, node.dataset.orig);
         }
         break;
@@ -1145,7 +1145,7 @@ function translateElement(el) {
     if (I18N[txt]) {
       if (!el.dataset.orig) el.dataset.orig = txt;
       el.textContent = I18N[txt];
-    } else if (el.dataset.orig && lang === 'en') {
+    } else if (el.dataset.orig && currentLang === 'en') {
       el.textContent = el.dataset.orig;
     }
     return;
@@ -1156,7 +1156,7 @@ function translateElement(el) {
     if (I18N[txt]) {
       if (!el.dataset.orig) el.dataset.orig = txt;
       el.textContent = I18N[txt];
-    } else if (el.dataset.orig && lang === 'en') {
+    } else if (el.dataset.orig && currentLang === 'en') {
       el.textContent = el.dataset.orig;
     }
   }
