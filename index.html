@@ -1122,66 +1122,47 @@ const I18N = {
 
 let currentLang = localStorage.getItem('lang') || 'zh';
 
-function translateElement(el) {
-  // 处理 label：只替换第一个文本节点（保留 span.value）
-  if (el.tagName === 'LABEL') {
-    for (let node of el.childNodes) {
-      if (node.nodeType === 3 && node.textContent.trim()) {
-        const txt = node.textContent.trim();
-        if (I18N[txt]) {
-          if (!node.dataset.orig) node.dataset.orig = txt;
-          node.textContent = node.textContent.replace(txt, I18N[txt]);
-        } else if (node.dataset.orig && currentLang === 'en') {
-          node.textContent = node.textContent.replace(I18N[node.dataset.orig] || txt, node.dataset.orig);
-        }
-        break;
-      }
-    }
-    return;
+function translateText(el, txt) {
+  const trimmed = txt.trim();
+  if (!trimmed) return txt;
+  if (currentLang === 'zh' && I18N[trimmed]) {
+    if (!el.dataset.orig) el.dataset.orig = trimmed;
+    return txt.replace(trimmed, I18N[trimmed]);
+  } else if (currentLang === 'en' && el.dataset.orig) {
+    return txt.replace(I18N[el.dataset.orig] || trimmed, el.dataset.orig);
   }
-  // 处理 option
-  if (el.tagName === 'OPTION') {
-    const txt = el.textContent.trim();
-    if (I18N[txt]) {
-      if (!el.dataset.orig) el.dataset.orig = txt;
-      el.textContent = I18N[txt];
-    } else if (el.dataset.orig && currentLang === 'en') {
-      el.textContent = el.dataset.orig;
-    }
-    return;
-  }
-  // 处理纯文本叶子节点
-  if (el.children.length === 0 && el.textContent.trim()) {
-    const txt = el.textContent.trim();
-    if (I18N[txt]) {
-      if (!el.dataset.orig) el.dataset.orig = txt;
-      el.textContent = I18N[txt];
-    } else if (el.dataset.orig && currentLang === 'en') {
-      el.textContent = el.dataset.orig;
-    }
-  }
+  return txt;
 }
 
 function applyLang(lang) {
   currentLang = lang;
-  document.querySelectorAll('label, option, .mode-tab, .toggle-row span, .btn, .control-group label, .upload-zone .text, .upload-zone .hint, .ai-panel label, .ai-panel option, .ai-panel h2, .ai-panel p, .frame-info').forEach(el => {
-    translateElement(el);
-  });
-  // 处理 toggle-row 里的 span
-  document.querySelectorAll('.toggle-row > span').forEach(span => {
-    const txt = span.textContent.trim();
-    if (I18N[txt]) {
-      if (!span.dataset.orig) span.dataset.orig = txt;
-      span.textContent = I18N[txt];
-    } else if (span.dataset.orig && lang === 'en') {
-      span.textContent = span.dataset.orig;
+  localStorage.setItem('lang', lang);
+
+  // 1. 纯文本叶子节点（按钮、tab、toggle、上传提示等）
+  document.querySelectorAll('*').forEach(el => {
+    if (el.children.length === 0) {
+      el.textContent = translateText(el, el.textContent);
     }
+  });
+
+  // 2. label 里的第一个文本节点（保留后面的 span.value）
+  document.querySelectorAll('label').forEach(label => {
+    for (let node of label.childNodes) {
+      if (node.nodeType === 3 && node.textContent.trim()) {
+        node.textContent = translateText(label, node.textContent);
+        break;
+      }
+    }
+  });
+
+  // 3. option
+  document.querySelectorAll('option').forEach(opt => {
+    opt.textContent = translateText(opt, opt.textContent);
   });
 }
 
 function toggleLang() {
   currentLang = currentLang === 'zh' ? 'en' : 'zh';
-  localStorage.setItem('lang', currentLang);
   applyLang(currentLang);
 }
 
