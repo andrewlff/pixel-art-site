@@ -99,6 +99,7 @@ canvas { max-width: 100%; image-rendering: pixelated; image-rendering: crisp-edg
 <div class="main">
   <!-- Sidebar -->
   <div class="sidebar">
+    <button class="btn btn-secondary" id="clear-btn" style="margin-bottom:16px;color:var(--red);display:none">🗑 清空图片</button>
     <div class="control-group">
       <label>Grid Size <span class="value" id="grid-val">64</span></label>
       <input type="range" id="grid" min="8" max="128" value="64">
@@ -277,7 +278,12 @@ document.querySelectorAll('.mode-tab').forEach(tab => {
     fpsGroup.style.display = (!isAI && mode === 'animation') ? '' : 'none';
     splitGroup.style.display = (!isAI && mode === 'animation') ? '' : 'none';
     videoGroup.style.display = (!isAI && mode === 'animation') ? '' : 'none';
-    if (!isAI) resetAll();
+    // 不调用 resetAll，保留已加载的图片
+    // 只更新按钮显示状态
+    if (!isAI && originalImgs.length) {
+      // 重新处理一下，适配当前模式的控件
+      processAll({ autoplay: false, keepFrame: true });
+    }
   });
 });
 
@@ -289,6 +295,7 @@ function resetAll() {
   stopPlay();
   uploadZone.style.display = '';
   canvasWrap.style.display = 'none';
+  clearBtn.style.display = 'none';
   downloadBtn.style.display = 'none';
   compareBtn.style.display = 'none';
   playBtn.style.display = 'none';
@@ -636,6 +643,7 @@ function processAll(opts = {}) {
   buildFrameStrip();
   uploadZone.style.display = 'none';
   canvasWrap.style.display = 'block';
+  clearBtn.style.display = 'block';
   downloadBtn.style.display = 'block';
   compareBtn.style.display = 'block';
 
@@ -872,6 +880,13 @@ function setFrameDelay() {
 }
 
 // ---- Sprite Sheet export ----
+const clearBtn = document.getElementById('clear-btn');
+clearBtn.addEventListener('click', () => {
+  if (confirm('确定要清空所有已加载的图片吗？')) {
+    resetAll();
+  }
+});
+
 const exportSheetBtn = document.getElementById('export-sheet-btn');
 exportSheetBtn.addEventListener('click', () => {
   if (processedFrames.length < 2) return;
