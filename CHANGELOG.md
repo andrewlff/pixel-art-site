@@ -2,6 +2,20 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+## [Unreleased] — 2026-09-22
+
+### Added
+- 众生之门风格战斗HUD复刻：深青#00353F + 青绿#4F948B + 金黄#EBC407 配色
+- Q版黑猫玩家模型（圆头+竖耳+大眼）
+- 圆形小地图 + 摇杆装饰 + 技能按钮组（带快捷键角标）
+- 顶部怪物血条 + 玩家血条/灵能条双层条
+
+### Fixed
+- GIF帧叠加残影问题：disposal=2 每帧清屏后重绘
+- 鼠标灵敏度过高：从0.002降到0.0015，pitch限制±0.7弧度
+
+---
+
 ## [Unreleased] — 2026-09-21
 
 ### Added
