@@ -2,6 +2,19 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+## [Unreleased] — 2026-09-23
+
+### Added
+- 黑猫角色3套动作帧生成管线验证：出拳攻击(120ms)、挥剑攻击(140ms)、跳跃(150ms)
+- 优化后提示词模板：锚点固定+6帧动作细化+头尾帧呼应，解决帧间漂移
+- 透明GIF编码器修复：disposal=2全局色表+专用透明索引，彻底消除帧叠加残影
+
+### Improved
+- 像素化质量提升：RGBA分离量化（RGB中位切分+alpha通道保留）
+- 动作帧一致性：同一角色6帧外观锚点统一（发色/服装/武器/瞳色）
+
+---
+
 ## [Unreleased] — 2026-09-22
 
 ### Added
