@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -77,6 +77,45 @@ canvas { max-width: 100%; image-rendering: pixelated; image-rendering: crisp-edg
   .main { grid-template-columns: 1fr; }
   .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
 }
+
+/* Changelog Modal */
+.changelog-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); display:flex; align-items:center; justify-content:center; z-index:1000; opacity:0; pointer-events:none; transition:opacity 0.25s; }
+.changelog-overlay.show { opacity:1; pointer-events:auto; }
+.changelog-modal { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:28px; max-width:480px; width:90%; max-height:80vh; overflow-y:auto; position:relative; box-shadow:0 8px 32px rgba(0,0,0,0.5); }
+.changelog-modal h2 { font-size:18px; margin-bottom:2px; }
+.changelog-modal .version { color:var(--accent); font-size:14px; font-weight:600; margin-bottom:4px; }
+.changelog-modal .changelog-date { font-size:11px; color:var(--text-dim); margin-bottom:18px; }
+.changelog-modal ul { list-style:none; padding:0; }
+.changelog-modal li { padding:10px 0; border-bottom:1px solid var(--border); font-size:13px; line-height:1.6; display:flex; gap:8px; align-items:flex-start; }
+.changelog-modal li:last-child { border-bottom:none; }
+.changelog-modal li .tag { display:inline-block; font-size:10px; padding:2px 7px; border-radius:3px; font-weight:700; flex-shrink:0; margin-top:1px; }
+.changelog-modal li .tag.new { background:var(--green); color:#0a0a0f; }
+.changelog-modal li .tag.improve { background:var(--accent); color:#0a0a0f; }
+.changelog-modal li .tag.fix { background:var(--orange); color:#0a0a0f; }
+.changelog-close { position:absolute; top:10px; right:14px; background:none; border:none; color:var(--text-dim); font-size:22px; cursor:pointer; line-height:1; }
+.changelog-close:hover { color:var(--text); }
+.changelog-ok { margin-top:20px; }
+.changelog-history { font-size:11px; color:var(--text-dim); text-align:center; margin-top:12px; cursor:pointer; text-decoration:underline; }
+.changelog-history:hover { color:var(--accent); }
+
+
+/* About Modal */
+.about-modal { max-width:560px; }
+.about-modal .about-body { display:grid; grid-template-columns:1.3fr 1fr; gap:24px; margin-top:8px; }
+.about-modal .about-col h4 { font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin:14px 0 8px; }
+.about-modal .about-col h4:first-child { margin-top:0; }
+.about-modal .about-col p { font-size:12px; color:var(--text-dim); line-height:1.7; }
+.about-modal .usage-list { display:flex; flex-direction:column; gap:6px; }
+.about-modal .usage-item { font-size:12px; color:var(--text-dim); line-height:1.5; }
+.about-modal .usage-item strong { color:var(--text); font-weight:600; }
+.about-modal .formats-bar { font-size:11px; color:var(--text-dim); padding:8px 10px; background:var(--surface2); border-radius:6px; margin-top:8px; }
+.about-modal .support-list { list-style:none; padding:0; margin:0 0 10px; }
+.about-modal .support-list li { font-size:12px; color:var(--text-dim); line-height:1.8; padding-left:16px; position:relative; }
+.about-modal .support-list li::before { content:'\2b50'; position:absolute; left:0; font-size:10px; }
+.about-modal .wallet-addr { font-family:'SF Mono','Cascadia Code','Consolas',monospace; font-size:11px; color:var(--accent); background:var(--surface2); padding:6px 10px; border-radius:4px; word-break:break-all; margin:6px 0 10px; }
+.about-modal a { color:var(--accent); font-size:12px; text-decoration:none; }
+.about-modal a:hover { text-decoration:underline; }
+@media (max-width:600px) { .about-modal .about-body { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -85,6 +124,7 @@ canvas { max-width: 100%; image-rendering: pixelated; image-rendering: crisp-edg
   <h1>Pixelizer <span>· 像素化 + 动作帧</span></h1>
   <div style="display:flex;gap:16px;align-items:center">
     <a class="github-link" href="https://github.com/andrewlff/pixel-art-action-frames" target="_blank">GitHub ↗</a>
+    <a class="github-link" href="#" onclick="showAbout();return false;" style="color:var(--text-dim)">About</a>
     <a class="github-link" href="#" onclick="var a=prompt('USDT (TRC20) 收款地址：\n点击确定复制','TFtHDFWCMFMxLCtsBQpPudToiKry6ETTQ1');if(a)navigator.clipboard.writeText(a);return false;" style="color:#f472b6">❤ 赞助我</a>
     <button onclick="toggleLang()" style="background:var(--surface2);border:1px solid var(--border);color:var(--accent);border-radius:6px;padding:4px 12px;cursor:pointer;font-family:inherit;font-size:12px">中 / EN</button>
   </div>
@@ -102,7 +142,7 @@ canvas { max-width: 100%; image-rendering: pixelated; image-rendering: crisp-edg
     <button class="btn btn-secondary" id="clear-btn" style="margin-bottom:16px;color:var(--red);display:none">🗑 清空图片</button>
     <div class="control-group">
       <label>Grid Size <span class="value" id="grid-val">64</span></label>
-      <input type="range" id="grid" min="8" max="128" value="64">
+      <input type="range" id="grid" min="8" max="256" value="64">
       <div style="display:flex;gap:4px;margin-top:6px" id="preset-row">
         <button class="btn btn-secondary preset-btn" data-grid="16" style="margin:0;padding:4px;font-size:10px;flex:1">16</button>
         <button class="btn btn-secondary preset-btn" data-grid="32" style="margin:0;padding:4px;font-size:10px;flex:1">32</button>
@@ -121,7 +161,7 @@ canvas { max-width: 100%; image-rendering: pixelated; image-rendering: crisp-edg
 
     <div class="control-group" id="fps-group" style="display:none">
       <label>FPS <span class="value" id="fps-val">8</span></label>
-      <input type="range" id="fps" min="1" max="24" value="8">
+      <input type="range" id="fps" min="1" max="60" value="8">
     </div>
     <div class="control-group" id="split-group" style="display:none">
       <div class="toggle-row"><span>Split Sheet</span><div class="toggle" id="split-toggle"></div></div>
@@ -138,7 +178,7 @@ canvas { max-width: 100%; image-rendering: pixelated; image-rendering: crisp-edg
     </div>
     <div class="control-group" id="video-group" style="display:none">
       <label>Sample FPS <span class="value" id="sample-fps-val">8</span></label>
-      <input type="range" id="sample-fps" min="1" max="30" value="8">
+      <input type="range" id="sample-fps" min="1" max="60" value="8">
     </div>
 
     <div class="control-group">
@@ -238,6 +278,58 @@ canvas { max-width: 100%; image-rendering: pixelated; image-rendering: crisp-edg
 
 <input type="file" class="hidden-input" id="file-input" accept="image/*,video/*" multiple>
 
+<!-- Changelog Modal -->
+<div class="changelog-overlay" id="changelog-overlay">
+  <div class="changelog-modal">
+    <button class="changelog-close" id="changelog-close">×</button>
+    <h2>What's New</h2>
+    <div class="version">v2.1</div>
+    <div class="changelog-date">2026-09-23</div>
+    <ul>
+      <li><span class="tag improve">Improved</span><span>FPS cap raised to 60 (playback + video sampling)</span></li>
+      <li><span class="tag improve">Improved</span><span>Pixel grid size cap raised to 256</span></li>
+      <li><span class="tag new">New</span><span>Changelog popup on site update</span></li>
+    </ul>
+    <button class="btn btn-primary changelog-ok" id="changelog-ok">Got it</button>
+  </div>
+</div>
+
+
+<!-- About Modal -->
+<div class="changelog-overlay" id="about-overlay">
+  <div class="changelog-modal about-modal">
+    <button class="changelog-close" id="about-close">×</button>
+    <h2>About Pixelizer</h2>
+    <div class="version">v2.1</div>
+    <div class="changelog-date">Free & Open Source</div>
+    <div class="about-body">
+      <div class="about-col">
+        <p>Free & open-source pixel art + animation frame tool. Runs in your browser, no install needed.</p>
+        <h4>Three Ways to Use</h4>
+        <div class="usage-list">
+          <div class="usage-item"><strong>Single Image</strong> — <span>Quickly convert any image to pixel art</span></div>
+          <div class="usage-item"><strong>Animation Frames</strong> — <span>Import PNG sequence or video, auto-extract frames, remove BG, export Sprite Sheet/GIF</span></div>
+          <div class="usage-item"><strong>AI Generate</strong> — <span>Generate character action prompts for AI image tools</span></div>
+        </div>
+        <div class="formats-bar">Import: PNG / JPG / WebP / MP4 / WebM · Export: PNG / GIF / Sprite Sheet / JSON</div>
+      </div>
+      <div class="about-col">
+        <h4>Support This Project</h4>
+        <p>Your support goes to:</p>
+        <ul class="support-list">
+          <li>Server hosting</li>
+          <li>Feature development</li>
+          <li>Keeping it free & ad-free</li>
+        </ul>
+        <p>USDT (TRC20):</p>
+        <div class="wallet-addr">TFtHDFWCMFMxLCtsBQpPudToiKry6ETTQ1</div>
+        <a href="https://github.com/andrewlff/pixel-art-action-frames" target="_blank">Open Source on GitHub ↗</a>
+      </div>
+    </div>
+    <button class="btn btn-primary changelog-ok" id="about-ok">Got it</button>
+  </div>
+</div>
+
 <script>
 const uploadZone = document.getElementById('upload-zone');
 const fileInput = document.getElementById('file-input');
@@ -278,6 +370,7 @@ document.querySelectorAll('.mode-tab').forEach(tab => {
     fpsGroup.style.display = (!isAI && mode === 'animation') ? '' : 'none';
     splitGroup.style.display = (!isAI && mode === 'animation') ? '' : 'none';
     videoGroup.style.display = (!isAI && mode === 'animation') ? '' : 'none';
+    updateUploadHint();
     // 不调用 resetAll，保留已加载的图片
     // 只更新按钮显示状态
     if (!isAI && originalImgs.length) {
@@ -310,6 +403,21 @@ function resetAll() {
   fileInput.value = '';
 }
 
+// ---- Upload hint text (switches by mode) ----
+function updateUploadHint() {
+  const text = document.getElementById('upload-text');
+  const hint = document.getElementById('upload-hint');
+  const zh = (localStorage.getItem('lang') || 'zh') === 'zh';
+  if (mode === 'animation') {
+    text.textContent = zh ? '拖入图片或视频到这里，或点击上传' : 'Drop images or video here or click to upload';
+    hint.textContent = zh ? '动画：多选 PNG 或 mp4/webm 视频' : 'Animation: multi-select PNGs or mp4/webm video';
+  } else {
+    text.textContent = zh ? '拖入图片到这里，或点击上传' : 'Drop image here or click to upload';
+    hint.textContent = zh ? '单图：1 张' : 'Single: 1 image';
+  }
+}
+updateUploadHint();
+
 // ---- Upload ----
 uploadZone.addEventListener('click', () => fileInput.click());
 uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.style.borderColor = 'var(--accent)'; });
@@ -317,7 +425,7 @@ uploadZone.addEventListener('dragleave', () => uploadZone.style.borderColor = ''
 uploadZone.addEventListener('drop', e => {
   e.preventDefault();
   uploadZone.style.borderColor = '';
-  const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+  const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
   if (files.length) loadFiles(files);
 });
 fileInput.addEventListener('change', e => {
@@ -551,21 +659,19 @@ downloadGifBtn.addEventListener('click', async () => {
       s.onload = res; s.onerror = rej;
       document.head.appendChild(s);
     });
-    // Load worker
-    await new Promise((res, rej) => {
-      const w = document.createElement('script');
-      w.src = 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js';
-      w.onload = res; w.onerror = rej;
-      document.head.appendChild(w);
-    });
   }
+  // Fetch worker as blob URL — avoids cross-origin Worker error on file://
+  const workerResp = await fetch('https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js');
+  const workerText = await workerResp.text();
+  const workerUrl = URL.createObjectURL(new Blob([workerText], {type: 'application/javascript'}));
+
   const scale = +scaleSlider.value;
   const fps = +fpsSlider.value;
   const gif = new GIF({
     workers: 2, quality: 10,
     width: processedFrames[0].width * scale,
     height: processedFrames[0].height * scale,
-    workerScript: 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js'
+    workerScript: workerUrl
   });
   processedFrames.forEach(frame => {
     const c = document.createElement('canvas');
@@ -1132,7 +1238,46 @@ const I18N = {
   'Copy Prompt': '复制提示词',
   '↔ Flip Horizontal': '↔ 水平翻转',
   '↕ Flip Vertical': '↕ 垂直翻转',
-  '⏱ Set Frame Delay': '⏱ 设置帧延迟'
+  '⏱ Set Frame Delay': '⏱ 设置帧延迟',
+  'What\'s New': '更新日志',
+  'Improved': '提升',
+  'New': '新增',
+  'FPS cap raised to 60 (playback + video sampling)': '帧率上限提升至 60fps（播放 + 视频采样）',
+  'Pixel grid size cap raised to 256': '像素尺寸上限提升至 256',
+  'Changelog popup on site update': '网站打开时显示更新日志提醒',
+  'Got it': '知道了',
+  'About Pixelizer': '关于 Pixelizer',
+  'Free & Open Source': '免费开源',
+  'Free & open-source pixel art + animation frame tool. Runs in your browser, no install needed.': '免费开源的像素画 + 动作帧工具。浏览器内运行，无需安装。',
+  'Three Ways to Use': '三种使用方式',
+  'Quickly convert any image to pixel art': '图片快速转像素画',
+  'Import PNG sequence or video, auto-extract frames, remove BG, export Sprite Sheet/GIF': '导入 PNG 序列或视频，自动抽帧、去背，导出 Sprite Sheet/GIF',
+  'Generate character action prompts for AI image tools': '为 AI 绘图工具生成角色动作提示词',
+  'Import: PNG / JPG / WebP / MP4 / WebM · Export: PNG / GIF / Sprite Sheet / JSON': '导入：PNG / JPG / WebP / MP4 / WebM · 导出：PNG / GIF / Sprite Sheet / JSON',
+  'Support This Project': '支持项目',
+  'Your support goes to:': '你的赞助用于：',
+  'Server hosting': '服务器托管',
+  'Feature development': '功能开发',
+  'Keeping it free & ad-free': '保持免费无广告',
+  'USDT (TRC20):': 'USDT (TRC20)：',
+  'Open Source on GitHub ↗': 'GitHub 开源 ↗',
+  'About': '关于',
+  'Free & open-source pixel art + animation frame tool. Runs in your browser, no install needed.': '免费开源的像素画 + 动作帧工具。浏览器内运行，无需安装。',
+  'Three Ways to Use': '三种使用方式',
+  'Single Image': '单图模式',
+  'Quickly convert any image to pixel art': '图片快速转像素画',
+  'Animation Frames': '动画帧模式',
+  'Import PNG sequence or video, auto-extract frames, remove BG, export Sprite Sheet/GIF': '导入 PNG 序列或视频，自动抽帧、去背，导出 Sprite Sheet/GIF',
+  'AI Generate': 'AI 生成',
+  'Generate character action prompts for AI image tools': '为 AI 绘图工具生成角色动作提示词',
+  'Import: PNG / JPG / WebP / MP4 / WebM · Export: PNG / GIF / Sprite Sheet / JSON': '导入：PNG / JPG / WebP / MP4 / WebM · 导出：PNG / GIF / Sprite Sheet / JSON',
+  'Support This Project': '支持项目',
+  'Your support goes to:': '你的赞助用于：',
+  'Server hosting': '服务器托管',
+  'Feature development': '功能开发',
+  'Keeping it free & ad-free': '保持免费无广告',
+  'USDT (TRC20):': 'USDT (TRC20)：',
+  'Open Source on GitHub ↗': 'GitHub 开源 ↗'
 };
 
 let currentLang = localStorage.getItem('lang') || 'zh';
@@ -1180,6 +1325,30 @@ function toggleLang() {
   currentLang = currentLang === 'zh' ? 'en' : 'zh';
   applyLang(currentLang);
 }
+
+// ---- Changelog popup ----
+const CHANGELOG_VERSION = 'v2.1';
+(function initChangelog() {
+  const overlay = document.getElementById('changelog-overlay');
+  const hide = () => { overlay.classList.remove('show'); localStorage.setItem('changelog_seen', CHANGELOG_VERSION); };
+  document.getElementById('changelog-ok').addEventListener('click', hide);
+  document.getElementById('changelog-close').addEventListener('click', hide);
+  overlay.addEventListener('click', e => { if (e.target === overlay) hide(); });
+  if (localStorage.getItem('changelog_seen') !== CHANGELOG_VERSION) {
+    setTimeout(() => overlay.classList.add('show'), 600);
+  }
+})();
+
+
+// ---- About popup ----
+function showAbout() { document.getElementById('about-overlay').classList.add('show'); }
+(function initAbout() {
+  const overlay = document.getElementById('about-overlay');
+  const hide = () => overlay.classList.remove('show');
+  document.getElementById('about-ok').addEventListener('click', hide);
+  document.getElementById('about-close').addEventListener('click', hide);
+  overlay.addEventListener('click', e => { if (e.target === overlay) hide(); });
+})();
 
 // 初始化
 if (currentLang === 'zh') applyLang('zh');
