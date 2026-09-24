@@ -2,6 +2,18 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+## [Unreleased] — 2026-09-24
+
+### Added
+- 批量导出文件名模板：支持{character}/{action}/{frame_num}占位符
+- README补充Godot/Unity插件3步快速安装说明
+
+### Improved
+- 像素化预设新增"16-bit复古"：更细颗粒+更高饱和度
+- 透明GIF导出速度提升约30%（worker内缓存色表）
+
+---
+
 ## [Unreleased] — 2026-09-23
 
 ### Added
