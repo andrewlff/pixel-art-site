@@ -1,8 +1,15 @@
 # Pixelizer 🎮
 
+[![GitHub stars](https://img.shields.io/github/stars/andrewlff/pixel-art-site?style=social)](https://github.com/andrewlff/pixel-art-site/stargazers)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 在线像素化 + 动作帧工具，纯前端，零依赖，免费开源。
 
 **在线使用**：https://pixel-art-site.pages.dev/
+
+## 🎬 效果演示
+
+![像素攻击动画演示](demo_anim.gif)
 
 ---
 
