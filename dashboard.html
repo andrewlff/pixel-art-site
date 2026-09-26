@@ -87,12 +87,21 @@ body {
 .progress-bar { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
 .progress-fill { height: 100%; border-radius: 3px; transition: width 0.6s; }
 
+/* Scene gallery */
+.scenes-gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.scene-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: border-color 0.2s; margin: 0; }
+.scene-card:hover { border-color: var(--accent); }
+.scene-card img { width: 100%; display: block; aspect-ratio: 3/2; object-fit: cover; }
+.scene-card figcaption { padding: 12px 14px; font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+.scene-card figcaption strong { display: block; color: var(--accent); font-size: 13px; margin-bottom: 4px; }
+
 /* Responsive */
 @media (max-width: 768px) {
   .stats { grid-template-columns: repeat(2, 1fr); }
   .repos { grid-template-columns: 1fr; }
   .grid-2 { grid-template-columns: 1fr; }
   .assets { grid-template-columns: repeat(2, 1fr); }
+  .scenes-gallery { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -101,26 +110,26 @@ body {
 
   <!-- Header -->
   <div class="header">
-    <h1>Pixel Art <span>Pipeline</span></h1>
-    <div class="date">2026-09-18 · 项目运营看板</div>
+    <h1>AI 游戏美术 <span>Skill 工具箱</span></h1>
+    <div class="date">2026-09-25 · 作品集看板</div>
   </div>
 
   <!-- Stats -->
   <div class="stats">
     <div class="stat-card">
+      <div class="label">Skill 工具</div>
+      <div class="value accent">9</div>
+      <div class="sub">角色 / 场景 / 动画 / 视频 / 回测</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">场景设定图</div>
+      <div class="value green">4 套 · 24 格</div>
+      <div class="sub">手绘 / 吉卜力 / 暗黑 / 像素赛博</div>
+    </div>
+    <div class="stat-card">
       <div class="label">GitHub Repos</div>
-      <div class="value accent">3</div>
+      <div class="value orange">3</div>
       <div class="sub">已发布公开仓库</div>
-    </div>
-    <div class="stat-card">
-      <div class="label">小红书笔记</div>
-      <div class="value green">1</div>
-      <div class="sub">今日已发布 · 7 天规划中</div>
-    </div>
-    <div class="stat-card">
-      <div class="label">定时任务</div>
-      <div class="value orange">2</div>
-      <div class="sub">每日发布 + 评论回复</div>
     </div>
     <div class="stat-card">
       <div class="label">美术资产</div>
@@ -129,24 +138,54 @@ body {
     </div>
   </div>
 
-  <!-- GitHub Repos -->
+  <!-- Skills -->
   <div class="section">
-    <div class="section-title">GitHub 仓库</div>
+    <div class="section-title">我的 Skill 工具箱</div>
     <div class="repos">
       <div class="repo-card">
         <div class="repo-name">pixel-art-action-frames</div>
-        <div class="repo-desc">核心管线：角色像素化 + 攻击动作帧 → 透明图集 + JSON + 动画 GIF</div>
-        <div class="repo-meta"><span>14 文件</span><span>MIT</span></div>
+        <div class="repo-desc">核心管线：角色立绘 → 复古像素画 + 攻击动作序列帧 → 透明图集 + JSON + 动画 GIF</div>
+        <div class="repo-meta"><span>像素美术</span><span>Godot/Unity</span></div>
       </div>
       <div class="repo-card">
-        <div class="repo-name">godot-pixel-batch-tool</div>
-        <div class="repo-desc">Godot 4 编辑器插件：批量像素化导出 + CLI</div>
-        <div class="repo-meta"><span>11 文件</span><span>MIT</span></div>
+        <div class="repo-name">action-sprite-generator</div>
+        <div class="repo-desc">从角色参考图生成游戏用 2D 动作帧动画：2×3 sprite sheet → 自动拆帧、去背景 → 透明 GIF</div>
+        <div class="repo-meta"><span>动作帧</span><span>参考图驱动</span></div>
       </div>
       <div class="repo-card">
-        <div class="repo-name">unity-pixel-batch-tool</div>
-        <div class="repo-desc">Unity 编辑器窗口：批量像素化 + 图集导出 + CLI</div>
-        <div class="repo-meta"><span>10 文件</span><span>MIT</span></div>
+        <div class="repo-name">character-batch-generator</div>
+        <div class="repo-desc">批量角色生成：世界观 + 数量 + 画风三要素 → 互不撞脸的角色规格 + 多人阵容 cast sheet</div>
+        <div class="repo-meta"><span>角色设定</span><span>批量出图</span></div>
+      </div>
+      <div class="repo-card">
+        <div class="repo-name">scene-batch-generator</div>
+        <div class="repo-desc">批量场景概念图：地点 × 时间 × 天气排列组合 → 光影色调分散的 environment sheet + 规格 JSON</div>
+        <div class="repo-meta"><span>场景设定</span><span>多风格预设</span></div>
+      </div>
+      <div class="repo-card">
+        <div class="repo-name">scene-detail-sheet-generator</div>
+        <div class="repo-desc">基于一张已有场景参考图，生成设定图集：主视角 / 鸟瞰 / 侧视 / 室内 / 细部特写 / 光影变体</div>
+        <div class="repo-meta"><span>场景深化</span><span>多角度</span></div>
+      </div>
+      <div class="repo-card">
+        <div class="repo-name">img2threejs</div>
+        <div class="repo-desc">物体 / 角色参考图 → 带质量门禁、可直接做动画的程序化 Three.js 3D 模型</div>
+        <div class="repo-meta"><span>3D 资产</span><span>Three.js</span></div>
+      </div>
+      <div class="repo-card">
+        <div class="repo-name">vibecoding-launch-video</div>
+        <div class="repo-desc">自制 App / 网站 / 工具 → 有真实产品截图与操作录屏证据的中文宣发视频</div>
+        <div class="repo-meta"><span>产品宣发</span><span>证据驱动</span></div>
+      </div>
+      <div class="repo-card">
+        <div class="repo-name">article-to-vertical-video</div>
+        <div class="repo-desc">科技文章 / 新闻 / 案例 / 链接 → 证据驱动的中文竖屏短视频，含真实截图与语义同步配音</div>
+        <div class="repo-meta"><span>内容视频</span><span>竖屏</span></div>
+      </div>
+      <div class="repo-card">
+        <div class="repo-name">mt5-cli-backtest</div>
+        <div class="repo-desc">MT5 命令行回测：编译 mq5 源码、跑 EA 回测、提取结果、生成原生 HTML 报告，全程不碰 GUI</div>
+        <div class="repo-meta"><span>量化回测</span><span>MT5</span></div>
       </div>
     </div>
   </div>
@@ -182,14 +221,26 @@ body {
     </div>
   </div>
 
-  <!-- Assets -->
+  <!-- Scene Gallery -->
   <div class="section">
-    <div class="section-title">美术资产清单</div>
-    <div class="assets">
-      <div class="asset-item"><div class="asset-icon">🎨</div><div class="asset-name">4 角色像素画</div></div>
-      <div class="asset-item"><div class="asset-icon">⚔️</div><div class="asset-name">24 攻击帧</div></div>
-      <div class="asset-item"><div class="asset-icon">🎞️</div><div class="asset-name">4 透明 GIF</div></div>
-      <div class="asset-item"><div class="asset-icon">📦</div><div class="asset-name">3 引擎插件</div></div>
+    <div class="section-title">场景概念画廊 · environment sheet（4 风格 × 6 格）</div>
+    <div class="scenes-gallery">
+      <figure class="scene-card">
+        <img src="scenes/g1_handpaint.jpg" alt="手绘奇幻 6 场景">
+        <figcaption><strong>手绘奇幻</strong><span>魔法森林 · 水晶洞 · 山顶城堡 · 城镇集市 · 古代遗迹 · 地下神殿</span></figcaption>
+      </figure>
+      <figure class="scene-card">
+        <img src="scenes/g2_ghibli.jpg" alt="吉卜力治愈 6 场景">
+        <figcaption><strong>治愈水彩</strong><span>雪山隘口 · 迷雾沼泽 · 火山熔岩 · 海滨港口 · 沙漠绿洲 · 浮空群岛</span></figcaption>
+      </figure>
+      <figure class="scene-card">
+        <img src="scenes/g3_dark.jpg" alt="暗黑奇幻 6 场景">
+        <figcaption><strong>暗黑奇幻</strong><span>云雾城堡 · 雨后集市 · 黄昏遗迹 · 地下神殿 · 雪山道 · 黎明沼泽</span></figcaption>
+      </figure>
+      <figure class="scene-card">
+        <img src="scenes/g4_pixel_neon.jpg" alt="16-bit 像素赛博 6 场景">
+        <figcaption><strong>16-bit 像素赛博</strong><span>霓虹街口 · 地铁车厢 · 深夜便利店 · 城市天台 · 废弃工厂 · 高架立交</span></figcaption>
+      </figure>
     </div>
   </div>
 

@@ -2,6 +2,18 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+## [Unreleased] — 2026-09-26
+
+### Added
+- 作品集看板升级：dashboard.html 改为「AI 游戏美术 Skill 工具箱」，新增场景画廊（scenes-gallery）模块
+- 场景设定图资产 4 套 24 格：手绘（g1_handpaint）/ 吉卜力（g2_ghibli）/ 暗黑（g3_dark）/ 像素赛博（g4_pixel_neon），附 prompts.json 与批量生成脚本 _gen_prompts.py
+- 看板统计更新：Skill 工具 9 项、场景设定图 4 套 · 24 格、GitHub Repos 3 个
+
+### Improved
+- 作品集看板移动端适配：scenes-gallery 单列布局
+
+---
+
 ## [Unreleased] — 2026-09-24
 
 ### Added
