@@ -2,6 +2,14 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+## [Unreleased] — 2026-09-27
+
+### Added
+- 射手（archer）角色像素化管线验证：立绘 → 6 帧动作序列 → 透明图集（archer_sheet.png）+ 帧清单（archer_sheet.json）+ 动画 GIF（archer_sheet.gif），产物入 scenes/archer_frames/out
+- README 增加 star badge 与 demo GIF（推广计划落地）
+
+---
+
 ## [Unreleased] — 2026-09-26
 
 ### Added
