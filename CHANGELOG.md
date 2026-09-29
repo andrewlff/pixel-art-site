@@ -1,6 +1,14 @@
-# Changelog
+﻿# Changelog
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
+
+## [Unreleased] — 2026-09-29
+
+### Added
+- Pixelizer 演示视频系列：最终版 10 支（字幕/旁白/BGM 多版本，Pixelizer-demo-*.mp4），用于小红书/B站推广物料
+- 场景风格化测试扩展：新增厚涂（g5_thick）/ 水墨（g6_ink）/ 低多边形（g7_lowpoly）3 种风格场景测试图，累计 7 种风格
+
+---
 
 ## [Unreleased] — 2026-09-27
 
