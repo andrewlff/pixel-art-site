@@ -1,6 +1,14 @@
-﻿# Changelog
+# Changelog
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
+
+## [Unreleased] — 2026-09-30
+
+### Added
+- 白底可抠图素材库（Pixel-assets-white-bg）：像素角色/道具系列（骑士、长剑、橘白猫咪等），纯白背景独立主体，可直接抠图用于游戏素材与社媒配图（生成规则：白底可抠图 + 亮眼配色 + 不重复）
+- 素材生成规则落地：小红书配图统一走"自主生成白底可抠图素材"流程，避免往期雷同
+
+---
 
 ## [Unreleased] — 2026-09-29
 
