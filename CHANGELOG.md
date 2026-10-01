@@ -2,6 +2,12 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+
+## [Unreleased] — 2026-10-01
+
+### Added
+- 白底可抠图素材库扩展（Pixel-assets-white-bg v2）：新增 4 个高辨识度像素主体（机甲骑士、烈焰魔龙、猫耳剑士、水晶魔像），1:1 白底独立主体，亮眼撞色 + 强记忆点造型，可直接抠图进游戏与社媒封面（生成规则：白底可抠图 + 吸引眼球 + 不重复往期）
+- 小红书 10-01 笔记配图使用自主生成新素材（四宫格拼图 1 张），封面与 09-30 期完全不重复
 ## [Unreleased] — 2026-09-30
 
 ### Added
