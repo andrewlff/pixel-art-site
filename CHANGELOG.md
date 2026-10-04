@@ -3,6 +3,17 @@
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
 
+## [Unreleased] — 2026-10-04
+
+### Added
+- Pixelizer 素材库编辑模式（Library Edit）：新增「素材库编辑」Tab，白底素材缩略图网格（lib-grid）+ 选中预览，支持从素材库直接载入编辑
+- 帧定位编辑器：动画帧模式下逐帧走查（上一帧/下一帧）、X/Y 偏移滑块（-64~64px）、画布直接拖动移动当前帧、重置本帧（09-28 开发，本次提交入库）
+
+### Notes
+- 10-02/10-03 无新增功能迭代（国庆假期，无产出）
+
+---
+
 ## [Unreleased] — 2026-10-01
 
 ### Added

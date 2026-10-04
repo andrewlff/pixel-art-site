@@ -116,6 +116,22 @@ canvas { max-width: 100%; image-rendering: pixelated; image-rendering: crisp-edg
 .about-modal a { color:var(--accent); font-size:12px; text-decoration:none; }
 .about-modal a:hover { text-decoration:underline; }
 @media (max-width:600px) { .about-modal .about-body { grid-template-columns:1fr; } }
+
+/* ---- 素材库 + 重新定位编辑器 (Library Edit) ---- */
+#library-panel { font-family:'SF Mono','Cascadia Code','Consolas',monospace; }
+.lib-control-card { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:10px 12px; }
+.lib-card-title { font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+#lib-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(84px,1fr)); gap:8px; }
+#lib-grid .lib-thumb { border:1px solid var(--border); border-radius:6px; overflow:hidden; cursor:pointer; background:var(--surface2); text-align:center; transition:border-color .15s, box-shadow .15s; }
+#lib-grid .lib-thumb:hover { border-color:var(--accent); }
+#lib-grid .lib-thumb.selected { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent); }
+#lib-grid .lib-thumb canvas { display:block; margin:4px auto 0; max-width:100%; image-rendering:pixelated; image-rendering:crisp-edges; }
+#lib-grid .lib-thumb .lib-thumb-name { font-size:9px; color:var(--text-dim); padding:4px 2px 5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#lib-anchor-grid { display:grid; grid-template-columns:repeat(3,32px); gap:4px; margin-bottom:6px; }
+#lib-anchor-grid .lib-anchor-btn { width:32px; height:32px; background:var(--surface); border:1px solid var(--border); color:var(--text); border-radius:4px; cursor:pointer; font-size:9px; line-height:1.2; padding:0; transition:all .12s; }
+#lib-anchor-grid .lib-anchor-btn:hover { border-color:var(--accent); color:var(--accent); }
+#lib-anchor-grid .lib-anchor-btn.on { background:var(--accent); color:#0a0a0f; font-weight:600; }
+@media (max-width:900px) { #library-panel > div:last-child { grid-template-columns:1fr !important; } }
 </style>
 </head>
 <body>
@@ -134,6 +150,7 @@ canvas { max-width: 100%; image-rendering: pixelated; image-rendering: crisp-edg
   <div class="mode-tab active" data-mode="single">Single Image</div>
   <div class="mode-tab" data-mode="animation">Animation Frames</div>
   <div class="mode-tab" data-mode="ai">AI Generate</div>
+  <div class="mode-tab" data-mode="library">素材库编辑</div>
 </div>
 
 <div class="main">
@@ -162,6 +179,20 @@ canvas { max-width: 100%; image-rendering: pixelated; image-rendering: crisp-edg
     <div class="control-group" id="fps-group" style="display:none">
       <label>FPS <span class="value" id="fps-val">8</span></label>
       <input type="range" id="fps" min="1" max="60" value="8">
+    </div>
+    <div class="control-group" id="frame-pos-group" style="display:none">
+      <label>帧定位 <span class="value" id="frame-pos-val">0, 0</span></label>
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px">
+        <button class="btn btn-secondary" id="frame-prev-btn" style="margin:0;flex:1;padding:5px;font-size:11px">◀ 上一帧</button>
+        <span id="frame-step-label" style="font-size:11px;color:var(--accent);min-width:38px;text-align:center">1</span>
+        <button class="btn btn-secondary" id="frame-next-btn" style="margin:0;flex:1;padding:5px;font-size:11px">下一帧 ▶</button>
+      </div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px">X 偏移（像素）</div>
+      <input type="range" id="frame-pos-x" min="-64" max="64" value="0">
+      <div style="font-size:10px;color:var(--text-dim);margin:8px 0 4px">Y 偏移（像素）</div>
+      <input type="range" id="frame-pos-y" min="-64" max="64" value="0">
+      <button class="btn btn-secondary" id="frame-pos-reset" style="margin-top:6px;font-size:11px;padding:6px">↺ 重置本帧</button>
+      <div style="font-size:10px;color:var(--text-dim);margin-top:6px">用「上一帧/下一帧」逐帧走查；在画布上直接拖动，即可移动当前帧位置</div>
     </div>
     <div class="control-group" id="split-group" style="display:none">
       <div class="toggle-row"><span>Split Sheet</span><div class="toggle" id="split-toggle"></div></div>
@@ -332,6 +363,88 @@ canvas { max-width: 100%; image-rendering: pixelated; image-rendering: crisp-edg
   </div>
 </div>
 
+<!-- 素材库 + 重新定位编辑器 (Library Edit) -->
+<div id="library-panel" style="display:none;max-width:1180px;margin:24px auto;padding:0 24px">
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+    <h2 style="font-size:16px;margin:0">素材库 <span style="color:var(--accent)">· 重新定位编辑器</span></h2>
+    <span style="font-size:11px;color:var(--text-dim)" id="lib-folder-label">未选择素材文件夹</span>
+  </div>
+
+  <!-- 顶部操作条 -->
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:16px">
+    <button class="btn btn-primary" id="lib-pick-folder" style="margin:0;width:auto;padding:9px 14px">📁 选择本地素材文件夹</button>
+    <button class="btn btn-secondary" id="lib-pick-files" style="margin:0;width:auto;padding:9px 14px">📂 选择图片文件（备用）</button>
+    <button class="btn btn-secondary" id="lib-refresh" style="margin:0;width:auto;padding:9px 14px;display:none">🔄 刷新素材库</button>
+    <span id="lib-status" style="font-size:11px;color:var(--text-dim)"></span>
+  </div>
+
+  <!-- 主体：左素材网格 + 右编辑器 -->
+  <div style="display:grid;grid-template-columns:280px 1fr;gap:16px">
+    <!-- 素材库网格 -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;max-height:76vh;overflow-y:auto">
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:10px">素材库 <span id="lib-count" style="color:var(--accent)"></span></div>
+      <div id="lib-grid"></div>
+      <div id="lib-grid-empty" style="font-size:12px;color:var(--text-dim);text-align:center;padding:24px 0">选择文件夹后，图片素材会显示在这里</div>
+    </div>
+
+    <!-- 编辑器 -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+        <span style="font-size:12px;color:var(--text-dim)">当前素材 <span id="lib-asset-name" style="color:var(--accent)">未选择</span><span id="lib-asset-size" style="margin-left:8px"></span></span>
+        <span style="flex:1"></span>
+        <label style="font-size:11px;color:var(--text-dim)">缩放</label>
+        <select id="lib-scale" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:4px;font-family:inherit;font-size:12px">
+          <option value="4">4×</option><option value="8" selected>8×</option><option value="12">12×</option><option value="16">16×</option><option value="24">24×</option>
+        </select>
+      </div>
+
+      <!-- 画布区 -->
+      <div style="text-align:center;position:relative;background:conic-gradient(#2a2a3a 0% 25%,#1a1a25 0% 50%,#2a2a3a 0% 75%,#1a1a25 0) 0 0/16px 16px;border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:12px;overflow:auto">
+        <canvas id="lib-canvas" style="image-rendering:pixelated;image-rendering:crisp-edges;background:transparent;cursor:crosshair;display:none"></canvas>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:8px;min-height:16px" id="lib-canvas-hint">请从左侧选择一个素材</div>
+      </div>
+
+      <!-- 重新定位控制 -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+        <!-- 翻转 -->
+        <div class="lib-control-card">
+          <div class="lib-card-title">翻转 Flip</div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-secondary" id="lib-flip-h" style="margin:0;flex:1">↔ 水平翻转</button>
+            <button class="btn btn-secondary" id="lib-flip-v" style="margin:0;flex:1">↕ 垂直翻转</button>
+          </div>
+        </div>
+
+        <!-- 锚点 -->
+        <div class="lib-control-card">
+          <div class="lib-card-title">锚点 Anchor <span id="lib-anchor-xy" style="color:var(--accent);float:right"></span></div>
+          <div id="lib-anchor-grid"></div>
+          <div style="font-size:11px;color:var(--text-dim)">在画布上拖动红色圆点可自定义锚点</div>
+        </div>
+
+        <!-- 裁剪 -->
+        <div class="lib-control-card">
+          <div class="lib-card-title">裁剪 Crop</div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            <button class="btn btn-secondary" id="lib-crop-start" style="margin:0">✂ 框选裁剪</button>
+            <button class="btn btn-green" id="lib-crop-apply" style="margin:0;display:none">✓ 应用</button>
+            <button class="btn btn-secondary" id="lib-crop-cancel" style="margin:0;display:none">✕ 取消</button>
+            <span id="lib-crop-xy" style="font-size:11px;color:var(--text-dim)"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 导出 -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);align-items:center">
+        <button class="btn btn-primary" id="lib-export-png" style="margin:0;width:auto;padding:9px 16px">💾 导出 PNG</button>
+        <button class="btn btn-secondary" id="lib-export-json" style="margin:0;width:auto;padding:9px 16px">🧾 导出 JSON（含锚点）</button>
+        <span style="font-size:11px;color:var(--text-dim)">锚点会写入 PNG tEXt 元数据，可被本编辑器再次读取</span>
+      </div>
+    </div>
+  </div>
+</div>
+<input type="file" class="hidden-input" id="lib-file-input" accept="image/*" multiple>
+
 <input type="file" class="hidden-input" id="file-input" accept="image/*,video/*" multiple>
 
 <!-- Changelog Modal -->
@@ -421,15 +534,18 @@ document.querySelectorAll('.mode-tab').forEach(tab => {
     tab.classList.add('active');
     mode = tab.dataset.mode;
     const isAI = mode === 'ai';
-    document.querySelector('.main').style.display = isAI ? 'none' : 'grid';
+    const isLib = mode === 'library';
+    document.querySelector('.main').style.display = (isAI || isLib) ? 'none' : 'grid';
     document.getElementById('ai-panel').style.display = isAI ? 'block' : 'none';
-    fpsGroup.style.display = (!isAI && mode === 'animation') ? '' : 'none';
-    splitGroup.style.display = (!isAI && mode === 'animation') ? '' : 'none';
-    videoGroup.style.display = (!isAI && mode === 'animation') ? '' : 'none';
+    document.getElementById('library-panel').style.display = isLib ? 'block' : 'none';
+    fpsGroup.style.display = (!isAI && !isLib && mode === 'animation') ? '' : 'none';
+    framePosGroup.style.display = (!isAI && !isLib && mode === 'animation') ? '' : 'none';
+    splitGroup.style.display = (!isAI && !isLib && mode === 'animation') ? '' : 'none';
+    videoGroup.style.display = (!isAI && !isLib && mode === 'animation') ? '' : 'none';
     updateUploadHint();
     // 不调用 resetAll，保留已加载的图片
     // 只更新按钮显示状态
-    if (!isAI && originalImgs.length) {
+    if (!isAI && !isLib && originalImgs.length) {
       // 重新处理一下，适配当前模式的控件
       processAll({ autoplay: false, keepFrame: true });
     }
@@ -440,6 +556,7 @@ function resetAll() {
   originalImgs = [];
   processedFrames = [];
   frameDelays = [];
+  frameOffsets = [];
   currentFrame = 0;
   stopPlay();
   uploadZone.style.display = '';
@@ -732,10 +849,11 @@ downloadGifBtn.addEventListener('click', async () => {
     height: processedFrames[0].height * scale,
     workerScript: workerUrl
   });
-  processedFrames.forEach(frame => {
+  processedFrames.forEach((frame, i) => {
     const c = document.createElement('canvas');
     c.width = frame.width * scale; c.height = frame.height * scale;
-    c.getContext('2d').drawImage(frame, 0, 0, c.width, c.height);
+    const off = getFrameOffset(i);
+    c.getContext('2d').drawImage(frame, off.x * scale, off.y * scale, c.width, c.height);
     gif.addFrame(c, {delay: 1000/fps, copy: true});
   });
   downloadGifBtn.textContent = 'Encoding...';
@@ -820,6 +938,7 @@ function processAll(opts = {}) {
     exportSheetBtn.style.display = 'block';
     onionGroup.style.display = '';
     frameEditRow.style.display = 'flex';
+    framePosGroup.style.display = '';
     if (autoplay) startPlay(); else stopPlay();
   } else {
     playBtn.style.display = 'none';
@@ -828,6 +947,7 @@ function processAll(opts = {}) {
     exportJsonBtn.style.display = 'none';
     onionGroup.style.display = 'none';
     frameEditRow.style.display = 'none';
+    framePosGroup.style.display = 'none';
     stopPlay();
   }
 }
@@ -910,7 +1030,8 @@ function exportJSON() {
   const n = processedFrames.length;
   const frames = [];
   for (let i = 0; i < n; i++) {
-    frames.push({rect: [0, 0, cellW, cellH]});
+    const off = getFrameOffset(i);
+    frames.push({rect: [0, 0, cellW, cellH], offset: [off.x, off.y]});
   }
   const manifest = {
     type: "pixel_art_batch_sprite_sheet",
@@ -942,15 +1063,19 @@ function renderFrame(idx) {
   if (onionEnabled && processedFrames.length > 1) {
     const prev = processedFrames[(idx - 1 + processedFrames.length) % processedFrames.length];
     const next = processedFrames[(idx + 1) % processedFrames.length];
+    const po = getFrameOffset((idx - 1 + processedFrames.length) % processedFrames.length);
+    const no = getFrameOffset((idx + 1) % processedFrames.length);
     ctx.globalAlpha = 0.25;
-    ctx.drawImage(prev, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(prev, po.x * scale, po.y * scale, canvas.width, canvas.height);
     ctx.globalAlpha = 0.35;
-    ctx.drawImage(next, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(next, no.x * scale, no.y * scale, canvas.width, canvas.height);
     ctx.globalAlpha = 1.0;
   }
-  ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
+  const off = getFrameOffset(idx);
+  ctx.drawImage(frame, off.x * scale, off.y * scale, canvas.width, canvas.height);
   frameInfo.textContent = `Frame ${idx + 1} / ${processedFrames.length}`;
   frameStrip.querySelectorAll('.frame-thumb').forEach((t, i) => t.classList.toggle('active', i === idx));
+  syncFramePosUI();
 }
 
 function buildFrameStrip() {
@@ -992,6 +1117,83 @@ function buildFrameStrip() {
 }
 let dragIdx = null;
 let frameDelays = []; // per-frame delay in ms (0 = use global fps)
+
+// ---- 帧定位（逐帧 x/y 偏移） ----
+const framePosGroup = document.getElementById('frame-pos-group');
+const framePosX = document.getElementById('frame-pos-x');
+const framePosY = document.getElementById('frame-pos-y');
+const framePosReset = document.getElementById('frame-pos-reset');
+const framePosVal = document.getElementById('frame-pos-val');
+const framePrevBtn = document.getElementById('frame-prev-btn');
+const frameNextBtn = document.getElementById('frame-next-btn');
+const frameStepLabel = document.getElementById('frame-step-label');
+let frameOffsets = []; // 每帧 {x, y}，单位：原像素帧像素（绘制时乘以 scale）
+function getFrameOffset(idx) {
+  if (!frameOffsets[idx]) frameOffsets[idx] = { x: 0, y: 0 };
+  return frameOffsets[idx];
+}
+function stepFrame(dir) {
+  if (!processedFrames.length) return;
+  if (playing) stopPlay();
+  currentFrame = (currentFrame + dir + processedFrames.length) % processedFrames.length;
+  renderFrame(currentFrame);
+}
+framePrevBtn.addEventListener('click', () => stepFrame(-1));
+frameNextBtn.addEventListener('click', () => stepFrame(1));
+function syncFramePosUI() {
+  if (!processedFrames.length) { framePosGroup.style.display = 'none'; return; }
+  const o = getFrameOffset(currentFrame);
+  framePosX.value = o.x;
+  framePosY.value = o.y;
+  framePosVal.textContent = `${o.x}, ${o.y}`;
+  frameStepLabel.textContent = `${currentFrame + 1}/${processedFrames.length}`;
+}
+framePosX.addEventListener('input', () => {
+  if (!processedFrames.length) return;
+  getFrameOffset(currentFrame).x = +framePosX.value;
+  renderFrame(currentFrame);
+});
+framePosY.addEventListener('input', () => {
+  if (!processedFrames.length) return;
+  getFrameOffset(currentFrame).y = +framePosY.value;
+  renderFrame(currentFrame);
+});
+framePosReset.addEventListener('click', () => {
+  if (!processedFrames.length) return;
+  frameOffsets[currentFrame] = { x: 0, y: 0 };
+  renderFrame(currentFrame);
+});
+
+// ---- 鼠标直接拖动画布微调当前帧位置（动画模式） ----
+let canvasDrag = null; // {sx, sy, ox, oy}
+canvas.addEventListener('pointerdown', ev => {
+  if (mode !== 'animation' || showingOriginal || !processedFrames.length) return;
+  if (ev.button !== 0) return;
+  const rect = canvas.getBoundingClientRect();
+  canvasDrag = {
+    sx: ev.clientX - rect.left,
+    sy: ev.clientY - rect.top,
+    ox: getFrameOffset(currentFrame).x,
+    oy: getFrameOffset(currentFrame).y,
+  };
+  canvas.setPointerCapture(ev.pointerId);
+  ev.preventDefault();
+});
+canvas.addEventListener('pointermove', ev => {
+  if (!canvasDrag) return;
+  const rect = canvas.getBoundingClientRect();
+  const dx = (ev.clientX - rect.left) - canvasDrag.sx;
+  const dy = (ev.clientY - rect.top) - canvasDrag.sy;
+  const scale = +scaleSlider.value || 1;
+  const off = getFrameOffset(currentFrame);
+  off.x = canvasDrag.ox + Math.round(dx / scale);
+  off.y = canvasDrag.oy + Math.round(dy / scale);
+  framePosX.value = off.x;
+  framePosY.value = off.y;
+  renderFrame(currentFrame);
+});
+canvas.addEventListener('pointerup', () => { canvasDrag = null; });
+canvas.addEventListener('pointercancel', () => { canvasDrag = null; });
 
 // ---- Frame context menu (right-click) ----
 const ctxMenu = document.createElement('div');
@@ -1069,7 +1271,8 @@ exportSheetBtn.addEventListener('click', () => {
   processedFrames.forEach((frame, i) => {
     const r = Math.floor(i / cols);
     const c = i % cols;
-    sctx.drawImage(frame, c * cellW * scale, r * cellH * scale, cellW * scale, cellH * scale);
+    const off = getFrameOffset(i);
+    sctx.drawImage(frame, c * cellW * scale + off.x * scale, r * cellH * scale + off.y * scale, cellW * scale, cellH * scale);
   });
   const a = document.createElement('a');
   a.download = 'sprite_sheet.png';
@@ -1348,6 +1551,543 @@ aiSendFramesBtn.addEventListener('click', () => {
   fileInput.dispatchEvent(new Event('change', { bubbles: true }));
 });
 
+</script>
+
+<script>
+// ================= 素材库 + 重新定位编辑器 (Library Edit) =================
+(function() {
+  if (!document.getElementById('library-panel')) return;
+  const $ = id => document.getElementById(id);
+  const libCanvas = $('lib-canvas');
+  const lctx = libCanvas.getContext('2d');
+  const IMG_EXT = /\.(png|jpe?g|webp|gif|bmp|ico)$/i;
+  const clamp = (v, a, b) => v < a ? a : (v > b ? b : v);
+
+  const state = {
+    dirHandle: null,
+    folderName: '',
+    assets: [],      // {name, file, url}
+    editIdx: -1,
+    editing: null,   // {name, canvas, anchor{x,y}, cropRect}
+    scale: 8,
+    cropMode: false,
+    cropRect: null,
+    drag: null,
+  };
+
+  // ---- IndexedDB：持久化文件夹授权句柄（Chrome/Edge 支持结构化克隆） ----
+  function idbOpen() {
+    return new Promise((res, rej) => {
+      if (!window.indexedDB) return rej(new Error('no idb'));
+      const req = indexedDB.open('pixelizer_library', 1);
+      req.onupgradeneeded = e => e.target.result.createObjectStore('store');
+      req.onsuccess = e => res(e.target.result);
+      req.onerror = e => rej(req.error);
+    });
+  }
+  async function idbSet(key, val) {
+    try {
+      const db = await idbOpen();
+      return new Promise((res, rej) => {
+        const tx = db.transaction('store', 'readwrite');
+        tx.objectStore('store').put(val, key);
+        tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+      });
+    } catch (e) {}
+  }
+  async function idbGet(key) {
+    try {
+      const db = await idbOpen();
+      return new Promise((res, rej) => {
+        const tx = db.transaction('store', 'readonly');
+        const rq = tx.objectStore('store').get(key);
+        rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error);
+      });
+    } catch (e) { return null; }
+  }
+
+  // ---- 素材网格 ----
+  function renderGrid() {
+    const grid = $('lib-grid');
+    grid.innerHTML = '';
+    $('lib-count').textContent = state.assets.length ? `共 ${state.assets.length} 个` : '';
+    $('lib-grid-empty').style.display = state.assets.length ? 'none' : 'block';
+    state.assets.forEach((a, i) => {
+      const t = document.createElement('div');
+      t.className = 'lib-thumb' + (i === state.editIdx ? ' selected' : '');
+      const c = document.createElement('canvas');
+      const img = new Image();
+      img.onload = () => {
+        const w = c.width = Math.min(80, img.width);
+        const h = c.height = Math.max(1, Math.round(img.height * w / img.width));
+        const ctx = c.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(img, 0, 0, w, h);
+      };
+      img.src = a.url;
+      const nm = document.createElement('div');
+      nm.className = 'lib-thumb-name';
+      nm.textContent = a.name;
+      nm.title = a.name;
+      t.appendChild(c); t.appendChild(nm);
+      t.onclick = () => loadAsset(i);
+      grid.appendChild(t);
+    });
+  }
+
+  // ---- 扫描文件夹（含锚点元数据读取） ----
+  async function scanDir(handle) {
+    const found = [];
+    let count = 0;
+    const walk = async (dir, depth) => {
+      if (depth > 4 || count > 600) return;
+      for await (const entry of dir.values()) {
+        if (count > 600) break;
+        if (entry.kind === 'file') {
+          if (!IMG_EXT.test(entry.name)) continue;
+          count++;
+          found.push({ name: entry.name, fileHandle: entry });
+        } else if (entry.kind === 'directory' && depth < 3) {
+          await walk(entry, depth + 1);
+        }
+      }
+    };
+    try { await walk(handle, 0); } catch (e) { console.error('scan error', e); }
+    found.sort((a, b) => a.name.localeCompare(b.name, 'zh', { numeric: true }));
+
+    // 释放旧 objectURL 并重置编辑状态
+    state.assets.forEach(a => { if (a.url) URL.revokeObjectURL(a.url); });
+    state.assets = [];
+    state.editIdx = -1;
+    state.editing = null;
+    for (const f of found) {
+      try {
+        const file = await f.fileHandle.getFile();
+        state.assets.push({ name: f.name, file, url: URL.createObjectURL(file) });
+      } catch (e) {}
+    }
+    $('lib-status').textContent = `已加载 ${state.assets.length} 个素材`;
+    renderGrid();
+    renderEditor();
+  }
+
+  async function pickFolder() {
+    if (!window.showDirectoryPicker) {
+      $('lib-status').textContent = '⚠ 当前浏览器不支持“文件夹授权”，请用「选择图片文件（备用）」';
+      return;
+    }
+    try {
+      const handle = await window.showDirectoryPicker({ mode: 'read' });
+      state.dirHandle = handle;
+      state.folderName = handle.name;
+      $('lib-folder-label').textContent = '素材文件夹：' + handle.name;
+      $('lib-refresh').style.display = '';
+      idbSet('dir_handle', handle);
+      idbSet('dir_name', handle.name);
+      $('lib-status').textContent = '扫描中…';
+      await scanDir(handle);
+    } catch (e) {
+      if (e && e.name !== 'AbortError') {
+        $('lib-status').textContent = '✗ 无法读取文件夹：' + (e.message || String(e));
+      }
+    }
+  }
+
+  // ---- 备用：多选图片文件 ----
+  async function pickFiles() {
+    const input = $('lib-file-input');
+    input.value = '';
+    input.onchange = async () => {
+      const files = Array.from(input.files);
+      state.dirHandle = null;
+      $('lib-folder-label').textContent = '素材库：手动选择文件';
+      $('lib-refresh').style.display = 'none';
+      state.assets.forEach(a => { if (a.url) URL.revokeObjectURL(a.url); });
+      state.assets = files.filter(f => /^image\//.test(f.type)).map(f => ({ name: f.name, file: f, url: URL.createObjectURL(f) }));
+      state.editIdx = -1;
+      state.editing = null;
+      $('lib-status').textContent = `已加载 ${state.assets.length} 个素材`;
+      renderGrid();
+      renderEditor();
+    };
+    input.click();
+  }
+
+  // ---- 读取 PNG tEXt 锚点元数据 ----
+  function readAnchorFromPNG(file) {
+    return new Promise(res => {
+      if (!file || !/\.png$/i.test(file.name)) return res(null);
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const bytes = new Uint8Array(e.target.result);
+          if (bytes.length < 40 || bytes[0] !== 0x89 || bytes[1] !== 0x50) return res(null);
+          let pos = 8;
+          while (pos + 8 <= bytes.length) {
+            const len = ((bytes[pos] << 24) | (bytes[pos+1] << 16) | (bytes[pos+2] << 8) | bytes[pos+3]) >>> 0;
+            const type = String.fromCharCode(bytes[pos+4], bytes[pos+5], bytes[pos+6], bytes[pos+7]);
+            const data = pos + 8;
+            if (type === 'tEXt') {
+              let z = data;
+              while (z < data + len && bytes[z] !== 0) z++;
+              const key = new TextDecoder().decode(bytes.slice(data, z));
+              const value = new TextDecoder().decode(bytes.slice(z + 1, data + len));
+              if (key === 'Anchor') {
+                const m = value.split(',').map(Number);
+                if (m.length >= 2 && !isNaN(m[0]) && !isNaN(m[1])) return res({ x: m[0], y: m[1] });
+              }
+            }
+            if (type === 'IEND') break;
+            pos = data + len + 4;
+          }
+          res(null);
+        } catch (err) { res(null); }
+      };
+      reader.onerror = () => res(null);
+      reader.readAsArrayBuffer(file);
+    });
+  }
+
+  // ---- 载入素材到编辑器 ----
+  async function loadAsset(i) {
+    const a = state.assets[i];
+    if (!a) return;
+    const img = new Image();
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = a.url; });
+    const cnv = document.createElement('canvas');
+    cnv.width = img.width; cnv.height = img.height;
+    const c = cnv.getContext('2d');
+    c.imageSmoothingEnabled = false;
+    c.drawImage(img, 0, 0);
+
+    let anchor = { x: Math.floor(img.width / 2), y: Math.floor(img.height / 2) };
+    const meta = await readAnchorFromPNG(a.file);
+    if (meta) anchor = meta;
+
+    state.editIdx = i;
+    state.editing = { name: a.name, canvas: cnv, anchor, cropRect: null };
+    state.cropMode = false;
+    $('lib-asset-name').textContent = a.name;
+    $('lib-asset-size').textContent = `${cnv.width}×${cnv.height}px`;
+    $('lib-crop-start').textContent = '✂ 框选裁剪';
+    $('lib-crop-apply').style.display = 'none';
+    $('lib-crop-cancel').style.display = 'none';
+    $('lib-crop-xy').textContent = '';
+    renderEditor();
+    renderGrid();
+  }
+
+  // ---- 锚点预设 ----
+  const ANCHOR_PRESETS = [
+    [0, 0], [0.5, 0], [1, 0],
+    [0, 0.5], [0.5, 0.5], [1, 0.5],
+    [0, 1], [0.5, 1], [1, 1],
+  ];
+  function buildAnchorPresets() {
+    const g = $('lib-anchor-grid');
+    g.innerHTML = '';
+    const names = ['↖', '↑', '↗', '←', '·', '→', '↙', '↓', '↘'];
+    ANCHOR_PRESETS.forEach((p, idx) => {
+      const b = document.createElement('button');
+      b.className = 'lib-anchor-btn';
+      b.textContent = names[idx];
+      b.title = `锚点 ${Math.round(p[0]*100)}% / ${Math.round(p[1]*100)}%`;
+      b.onclick = () => {
+        if (!state.editing) return;
+        const e = state.editing;
+        e.anchor.x = Math.round((e.canvas.width - 1) * p[0]);
+        e.anchor.y = Math.round((e.canvas.height - 1) * p[1]);
+        syncAnchorBtns();
+        renderEditor();
+      };
+      g.appendChild(b);
+    });
+  }
+  function syncAnchorBtns() {
+    if (!state.editing) return;
+    const btns = $('lib-anchor-grid').children;
+    for (let i = 0; i < btns.length; i++) {
+      const p = ANCHOR_PRESETS[i];
+      const tx = Math.round((state.editing.canvas.width - 1) * p[0]);
+      const ty = Math.round((state.editing.canvas.height - 1) * p[1]);
+      btns[i].classList.toggle('on', tx === state.editing.anchor.x && ty === state.editing.anchor.y);
+    }
+  }
+
+  // ---- 画布渲染（精灵 + 锚点十字线 + 裁剪框） ----
+  function renderEditor() {
+    if (!state.editing) {
+      libCanvas.style.display = 'none';
+      $('lib-canvas-hint').textContent = '请从左侧选择一个素材';
+      $('lib-anchor-xy').textContent = '';
+      return;
+    }
+    libCanvas.style.display = '';
+    const e = state.editing;
+    const s = state.scale;
+    libCanvas.width = e.canvas.width * s;
+    libCanvas.height = e.canvas.height * s;
+    lctx.imageSmoothingEnabled = false;
+    lctx.clearRect(0, 0, libCanvas.width, libCanvas.height);
+    lctx.drawImage(e.canvas, 0, 0, libCanvas.width, libCanvas.height);
+
+    // 锚点十字线（白色十字 + 红色圆点）
+    const ax = e.anchor.x * s, ay = e.anchor.y * s;
+    lctx.save();
+    lctx.strokeStyle = 'rgba(255,255,255,0.85)';
+    lctx.lineWidth = 1;
+    lctx.beginPath();
+    lctx.moveTo(ax - 6, ay); lctx.lineTo(ax + 6, ay);
+    lctx.moveTo(ax, ay - 6); lctx.lineTo(ax, ay + 6);
+    lctx.stroke();
+    lctx.strokeStyle = 'rgba(255,80,80,0.95)';
+    lctx.lineWidth = 1.5;
+    lctx.beginPath(); lctx.arc(ax, ay, 3, 0, Math.PI * 2); lctx.stroke();
+    lctx.restore();
+
+    // 裁剪框
+    if (e.cropRect && e.cropRect.w && e.cropRect.h) {
+      const r = e.cropRect;
+      lctx.save();
+      lctx.strokeStyle = '#22d3ee';
+      lctx.lineWidth = 2;
+      lctx.strokeRect(r.x * s, r.y * s, r.w * s, r.h * s);
+      lctx.fillStyle = 'rgba(34,211,238,0.12)';
+      lctx.fillRect(r.x * s, r.y * s, r.w * s, r.h * s);
+      lctx.restore();
+    }
+
+    $('lib-anchor-xy').textContent = `${e.anchor.x}, ${e.anchor.y}`;
+    $('lib-canvas-hint').textContent = state.cropMode
+      ? `框选裁剪：拖拽绘制矩形（像素 ${e.canvas.width}×${e.canvas.height}）`
+      : `编辑 ${e.name} · 拖动红色圆点为锚点 · 缩放 ${s}×`;
+  }
+
+  // ---- 画布交互：锚点拖动 / 裁剪框 ----
+  function canvasPos(ev) {
+    const rect = libCanvas.getBoundingClientRect();
+    return {
+      sx: (ev.clientX - rect.left) * (libCanvas.width / rect.width),
+      sy: (ev.clientY - rect.top) * (libCanvas.height / rect.height),
+    };
+  }
+  libCanvas.addEventListener('pointerdown', ev => {
+    if (!state.editing) return;
+    const { sx, sy } = canvasPos(ev);
+    const s = state.scale;
+    const px = Math.round(sx / s), py = Math.round(sy / s);
+    if (state.cropMode) {
+      state.cropRect = { x: px, y: py, w: 0, h: 0 };
+      state.drag = { type: 'crop', px, py };
+    } else {
+      const dx = sx - state.editing.anchor.x * s, dy = sy - state.editing.anchor.y * s;
+      if (Math.hypot(dx, dy) <= 9) {
+        state.drag = { type: 'anchor', px, py };
+      }
+    }
+    libCanvas.setPointerCapture(ev.pointerId);
+  });
+  libCanvas.addEventListener('pointermove', ev => {
+    if (!state.editing || !state.drag) return;
+    const { sx, sy } = canvasPos(ev);
+    const s = state.scale;
+    const px = Math.round(sx / s), py = Math.round(sy / s);
+    if (state.drag.type === 'anchor') {
+      state.editing.anchor.x = clamp(px, 0, state.editing.canvas.width - 1);
+      state.editing.anchor.y = clamp(py, 0, state.editing.canvas.height - 1);
+      syncAnchorBtns();
+      renderEditor();
+    } else if (state.drag.type === 'crop') {
+      const x = Math.min(state.drag.px, px), y = Math.min(state.drag.py, py);
+      const w = Math.abs(px - state.drag.px), h = Math.abs(py - state.drag.py);
+      state.cropRect = { x, y, w, h };
+      renderEditor();
+    }
+  });
+  libCanvas.addEventListener('pointerup', () => {
+    if (!state.drag) return;
+    if (state.drag.type === 'crop') {
+      const r = state.cropRect;
+      const ok = r && r.w > 0 && r.h > 0;
+      $('lib-crop-xy').textContent = ok ? `选择 ${r.x},${r.y}  ${r.w}×${r.h}` : '';
+      $('lib-crop-apply').style.display = ok ? '' : 'none';
+      $('lib-crop-cancel').style.display = ok ? '' : 'none';
+    }
+    state.drag = null;
+  });
+
+  // ---- 翻转 ----
+  function flipEdit(dir) {
+    if (!state.editing) return;
+    const e = state.editing;
+    const cnv = document.createElement('canvas');
+    cnv.width = e.canvas.width; cnv.height = e.canvas.height;
+    const c = cnv.getContext('2d');
+    c.imageSmoothingEnabled = false;
+    c.save();
+    c.translate(dir === 'h' ? cnv.width : 0, dir === 'v' ? cnv.height : 0);
+    c.scale(dir === 'h' ? -1 : 1, dir === 'v' ? -1 : 1);
+    c.drawImage(e.canvas, 0, 0);
+    c.restore();
+    e.canvas = cnv;
+    // 锚点随翻转镜像
+    if (dir === 'h') e.anchor.x = (cnv.width - 1) - e.anchor.x;
+    else e.anchor.y = (cnv.height - 1) - e.anchor.y;
+    e.cropRect = null;
+    $('lib-crop-apply').style.display = 'none';
+    $('lib-crop-cancel').style.display = 'none';
+    syncAnchorBtns();
+    renderEditor();
+  }
+
+  // ---- 裁剪控制 ----
+  $('lib-crop-start').addEventListener('click', () => {
+    if (!state.editing) return;
+    state.cropMode = !state.cropMode;
+    if (!state.cropMode) {
+      state.editing.cropRect = null;
+      state.cropRect = null;
+      $('lib-crop-apply').style.display = 'none';
+      $('lib-crop-cancel').style.display = 'none';
+      $('lib-crop-xy').textContent = '';
+    }
+    $('lib-crop-start').textContent = state.cropMode ? '✂ 退出裁剪' : '✂ 框选裁剪';
+    renderEditor();
+  });
+  $('lib-crop-apply').addEventListener('click', () => {
+    const e = state.editing;
+    if (!e || !state.cropRect || !state.cropRect.w || !state.cropRect.h) return;
+    const r = state.cropRect;
+    const cnv = document.createElement('canvas');
+    cnv.width = Math.max(1, r.w); cnv.height = Math.max(1, r.h);
+    const c = cnv.getContext('2d');
+    c.imageSmoothingEnabled = false;
+    c.drawImage(e.canvas, r.x, r.y, r.w, r.h, 0, 0, r.w, r.h);
+    e.canvas = cnv;
+    e.anchor.x = clamp(e.anchor.x - r.x, 0, cnv.width - 1);
+    e.anchor.y = clamp(e.anchor.y - r.y, 0, cnv.height - 1);
+    e.cropRect = null; state.cropRect = null; state.cropMode = false;
+    $('lib-crop-start').textContent = '✂ 框选裁剪';
+    $('lib-crop-apply').style.display = 'none';
+    $('lib-crop-cancel').style.display = 'none';
+    $('lib-crop-xy').textContent = '';
+    $('lib-asset-size').textContent = `${cnv.width}×${cnv.height}px`;
+    syncAnchorBtns();
+    renderEditor();
+  });
+  $('lib-crop-cancel').addEventListener('click', () => {
+    if (state.editing) state.editing.cropRect = null;
+    state.cropRect = null; state.cropMode = false;
+    $('lib-crop-start').textContent = '✂ 框选裁剪';
+    $('lib-crop-apply').style.display = 'none';
+    $('lib-crop-cancel').style.display = 'none';
+    $('lib-crop-xy').textContent = '';
+    renderEditor();
+  });
+
+  // ---- 导出 PNG（注入锚点 tEXt 元数据） ----
+  function crc32(u8) {
+    let c; const table = [];
+    for (let n = 0; n < 256; n++) {
+      c = n;
+      for (let k = 0; k < 8; k++) c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1);
+      table[n] = c >>> 0;
+    }
+    let crc = 0xffffffff;
+    for (let i = 0; i < u8.length; i++) crc = (crc >>> 8) ^ table[(crc ^ u8[i]) & 0xff];
+    return (crc ^ 0xffffffff) >>> 0;
+  }
+  function injectPngText(dataUrl, key, value) {
+    const bin = atob(dataUrl.split(',')[1]);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const payload = new TextEncoder().encode(key + '\x00' + value);
+    const chunk = new Uint8Array(12 + payload.length);
+    const dv = new DataView(chunk.buffer);
+    dv.setUint32(0, payload.length);
+    chunk[4] = 0x74; chunk[5] = 0x45; chunk[6] = 0x58; chunk[7] = 0x74; // 'tEXt'
+    chunk.set(payload, 8);
+    dv.setUint32(8 + payload.length, crc32(chunk.slice(4, 8 + payload.length)));
+    // PNG: 签名8 + IHDR(8+13+4=25) => 33 处插入 tEXt
+    const insertPos = 33;
+    const out = new Uint8Array(bytes.length + chunk.length);
+    out.set(bytes.subarray(0, insertPos), 0);
+    out.set(chunk, insertPos);
+    out.set(bytes.subarray(insertPos), insertPos + chunk.length);
+    return new Blob([out], { type: 'image/png' });
+  }
+  $('lib-export-png').addEventListener('click', async () => {
+    if (!state.editing) return;
+    const e = state.editing;
+    const baseName = (e.name.replace(/\.[^.]+$/, '') || 'asset');
+    try {
+      const dataUrl = e.canvas.toDataURL('image/png');
+      const blob = injectPngText(dataUrl, 'Anchor', `${e.anchor.x},${e.anchor.y}`);
+      const a = document.createElement('a');
+      a.download = baseName + '_edit.png';
+      a.href = URL.createObjectURL(blob);
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+    } catch (err) {
+      const a = document.createElement('a');
+      a.download = baseName + '_edit.png';
+      a.href = e.canvas.toDataURL('image/png');
+      a.click();
+    }
+  });
+  $('lib-export-json').addEventListener('click', () => {
+    if (!state.editing) return;
+    const e = state.editing;
+    const baseName = (e.name.replace(/\.[^.]+$/, '') || 'asset');
+    const json = JSON.stringify({
+      tool: 'Pixelizer',
+      name: e.name,
+      width: e.canvas.width,
+      height: e.canvas.height,
+      anchor: e.anchor,
+      imageDataUrl: e.canvas.toDataURL('image/png'),
+      updatedAt: new Date().toISOString(),
+    }, null, 2);
+    const a = document.createElement('a');
+    a.download = baseName + '.json';
+    a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+  });
+
+  // ---- 初始化绑定 ----
+  $('lib-pick-folder').addEventListener('click', pickFolder);
+  $('lib-pick-files').addEventListener('click', pickFiles);
+  $('lib-refresh').addEventListener('click', () => { if (state.dirHandle) scanDir(state.dirHandle); });
+  $('lib-flip-h').addEventListener('click', () => flipEdit('h'));
+  $('lib-flip-v').addEventListener('click', () => flipEdit('v'));
+  $('lib-scale').addEventListener('change', () => {
+    state.scale = +$('lib-scale').value;
+    renderEditor();
+  });
+  buildAnchorPresets();
+  renderGrid();
+  renderEditor();
+
+  // ---- 恢复上次授权的素材文件夹 ----
+  (async () => {
+    if (!window.showDirectoryPicker) return;
+    try {
+      const handle = await idbGet('dir_handle');
+      if (!handle) return;
+      const perm = await handle.queryPermission({ mode: 'read' });
+      if (perm === 'granted') {
+        state.dirHandle = handle;
+        const name = await idbGet('dir_name');
+        state.folderName = name || handle.name;
+        $('lib-folder-label').textContent = '素材文件夹：' + (name || handle.name);
+        $('lib-refresh').style.display = '';
+        $('lib-status').textContent = '已恢复上次素材库，扫描中…';
+        await scanDir(handle);
+      }
+    } catch (e) { /* 需重新授权 */ }
+  })();
+})();
 </script>
 
 <script>
