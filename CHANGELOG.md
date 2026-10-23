@@ -12,6 +12,7 @@ All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 - 404 页面：未知路径不再由 SPA fallback 返回 200/index.html
 
 ### Changed
+- 顶栏「❤ 赞助我」的 prompt 弹窗入口并入 About 面板，钱包地址改为点击即复制（带已复制反馈）
 - 多帧色板统一：`Auto · lock to first frame` 用首帧色板预先锁定，处理当次即生效（此前需再触发一次渲染）
 - 抖动的背景处理改为先去背再量化，避免误差扩散把背景色带进角色边缘
 - 更新日志弹窗与 About 版本号升至 v2.2

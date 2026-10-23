@@ -118,7 +118,9 @@ canvas { max-width: 100%; image-rendering: pixelated; image-rendering: crisp-edg
 .about-modal .support-list { list-style:none; padding:0; margin:0 0 10px; }
 .about-modal .support-list li { font-size:12px; color:var(--text-dim); line-height:1.8; padding-left:16px; position:relative; }
 .about-modal .support-list li::before { content:'\2b50'; position:absolute; left:0; font-size:10px; }
-.about-modal .wallet-addr { font-family:'SF Mono','Cascadia Code','Consolas',monospace; font-size:11px; color:var(--accent); background:var(--surface2); padding:6px 10px; border-radius:4px; word-break:break-all; margin:6px 0 10px; }
+.about-modal .wallet-addr { font-family:'SF Mono','Cascadia Code','Consolas',monospace; font-size:11px; color:var(--accent); background:var(--surface2); padding:6px 10px; border-radius:4px; word-break:break-all; margin:6px 0 10px; cursor:pointer; border:1px solid transparent; transition:border-color .15s, color .15s; }
+.about-modal .wallet-addr:hover { border-color:var(--accent); }
+.about-modal .wallet-addr.copied { color:var(--green); border-color:var(--green); }
 .about-modal a { color:var(--accent); font-size:12px; text-decoration:none; }
 .about-modal a:hover { text-decoration:underline; }
 @media (max-width:600px) { .about-modal .about-body { grid-template-columns:1fr; } }
@@ -130,8 +132,7 @@ canvas { max-width: 100%; image-rendering: pixelated; image-rendering: crisp-edg
   <h1>Pixelizer <span>· 像素化 + 动作帧</span></h1>
   <div style="display:flex;gap:16px;align-items:center">
     <a class="github-link" href="https://github.com/andrewlff/pixel-art-action-frames" target="_blank">GitHub ↗</a>
-    <a class="github-link" href="#" onclick="showAbout();return false;" style="color:var(--text-dim)">About</a>
-    <a class="github-link" href="#" onclick="var a=prompt('USDT (TRC20) 收款地址：\n点击确定复制','TFtHDFWCMFMxLCtsBQpPudToiKry6ETTQ1');if(a)navigator.clipboard.writeText(a);return false;" style="color:#f472b6">❤ 赞助我</a>
+    <a class="github-link" href="#" onclick="showAbout();return false;" style="color:#f472b6">About · Sponsor</a>
     <button onclick="toggleLang()" style="background:var(--surface2);border:1px solid var(--border);color:var(--accent);border-radius:6px;padding:4px 12px;cursor:pointer;font-family:inherit;font-size:12px">中 / EN</button>
   </div>
 </div>
@@ -320,6 +321,7 @@ canvas { max-width: 100%; image-rendering: pixelated; image-rendering: crisp-edg
       <li><span class="tag new">New</span><span>Dithering: Floyd–Steinberg, Bayer 4×4 and Bayer 8×8</span></li>
       <li><span class="tag new">New</span><span>Palette presets (1-bit, Game Boy, PICO-8, Sweetie 16, DB16, C64) + .gpl/.hex import</span></li>
       <li><span class="tag improve">Improved</span><span>One palette can now run across every animation frame</span></li>
+      <li><span class="tag improve">Improved</span><span>About and sponsor entries are now a single panel</span></li>
       <li><span class="tag fix">Fixed</span><span>Unknown URLs now show a proper 404 page</span></li>
     </ul>
     <button class="btn btn-primary changelog-ok" id="changelog-ok">Got it</button>
@@ -353,8 +355,8 @@ canvas { max-width: 100%; image-rendering: pixelated; image-rendering: crisp-edg
           <li>Feature development</li>
           <li>Keeping it free & ad-free</li>
         </ul>
-        <p>USDT (TRC20):</p>
-        <div class="wallet-addr">TFtHDFWCMFMxLCtsBQpPudToiKry6ETTQ1</div>
+        <p>USDT (TRC20) · click to copy:</p>
+        <div class="wallet-addr" id="wallet-addr" title="Click to copy">TFtHDFWCMFMxLCtsBQpPudToiKry6ETTQ1</div>
         <a href="https://github.com/andrewlff/pixel-art-action-frames" target="_blank">Open Source on GitHub ↗</a>
       </div>
     </div>
@@ -1576,6 +1578,10 @@ const I18N = {
   'Changelog popup on site update': '网站打开时显示更新日志提醒',
   'Got it': '知道了',
   'About Pixelizer': '关于 Pixelizer',
+  'About · Sponsor': '关于 · 赞助',
+  'USDT (TRC20) · click to copy:': 'USDT (TRC20) · 点击复制：',
+  '✓ Copied to clipboard': '✓ 已复制到剪贴板',
+  'About and sponsor entries are now a single panel': '关于与赞助入口合并为一个面板',
   'Free & Open Source': '免费开源',
   'Free & open-source pixel art + animation frame tool. Runs in your browser, no install needed.': '免费开源的像素画 + 动作帧工具。浏览器内运行，无需安装。',
   'Three Ways to Use': '三种使用方式',
@@ -1679,6 +1685,34 @@ const CHANGELOG_VERSION = 'v2.2';
 
 // ---- About popup ----
 function showAbout() { document.getElementById('about-overlay').classList.add('show'); }
+
+// ---- Wallet copy (sponsor entry lives inside the About panel) ----
+const WALLET = 'TFtHDFWCMFMxLCtsBQpPudToiKry6ETTQ1';
+(function initWalletCopy() {
+  const el = document.getElementById('wallet-addr');
+  if (!el) return;
+  el.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(WALLET);
+    } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = WALLET;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (err) {}
+      ta.remove();
+    }
+    el.classList.add('copied');
+    el.textContent = currentLang === 'en' ? '✓ Copied to clipboard' : '✓ 已复制到剪贴板';
+    clearTimeout(el._hideTimer);
+    el._hideTimer = setTimeout(() => {
+      el.textContent = WALLET;
+      el.classList.remove('copied');
+    }, 1500);
+  });
+})();
 (function initAbout() {
   const overlay = document.getElementById('about-overlay');
   const hide = () => overlay.classList.remove('show');
