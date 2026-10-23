@@ -16,14 +16,17 @@
 ## ✨ 功能
 
 ### 单图像素化
-- 网格大小 8-128，颜色数 2-64，缩放 1-16
+- 网格大小 8-256，颜色数 2-64，缩放 1-16
+- 抖动：Floyd–Steinberg / Bayer 4×4 / Bayer 8×8
+- 调色板：1 位 / Game Boy / PICO-8 / Sweetie 16 / DawnBringer 16 / C64 预设
+- 支持导入 .gpl（Aseprite/GIMP）和 .hex（Lospec）色板，一键导出 .gpl
 - 深棕描边 / 透明背景开关
 - 标准尺寸预设（16/32/48/64）
 
 ### 动画帧模式
 - 多帧上传 / 视频抽帧（mp4/webm）
 - Sprite Sheet 一键拆分（cols×rows）
-- 色板锁定（多帧色调统一，导出 .gpl）
+- 色板锁定 / 预设色板跨帧统一，导出 .gpl
 - 绿幕/白地/黑地一键去背
 - 帧拖拽排序 / 右键翻转 / 每帧单独时长
 - 洋葱皮预览
@@ -61,7 +64,7 @@ cd pixel-art-site
 ## 🛠️ 技术栈
 
 - 纯 HTML/CSS/JS，零依赖
-- Canvas 2D 像素化算法（median-cut 量化 + flood-fill 去背景）
+- Canvas 2D 像素化算法（median-cut 量化 + Floyd–Steinberg 误差扩散 / Bayer 有序抖动 + flood-fill 去背景）
 - gif.js（CDN）导出 GIF
 - Cloudflare Pages 部署
 

@@ -2,7 +2,25 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+## [Unreleased] — 2026-10-23
 
+### Added
+- 抖动（Dithering）：Floyd–Steinberg 误差扩散、Bayer 4×4、Bayer 8×8 有序抖动，可在侧栏切换
+- 调色板预设：1-Bit、Game Boy、PICO-8、Sweetie 16、DawnBringer 16、Commodore 64
+- 色板导入：解析 GIMP/Aseprite `.gpl` 与 Lospec `.hex`，导入后可直接应用到多帧
+- 色板预览色块与颜色数显示；`Export .gpl` 在自动取色时也可导出当前首帧色板
+- 404 页面：未知路径不再由 SPA fallback 返回 200/index.html
+
+### Changed
+- 多帧色板统一：`Auto · lock to first frame` 用首帧色板预先锁定，处理当次即生效（此前需再触发一次渲染）
+- 抖动的背景处理改为先去背再量化，避免误差扩散把背景色带进角色边缘
+- 更新日志弹窗与 About 版本号升至 v2.2
+
+### Notes
+- 2026-10-22 深夜 Cloudflare Web Traffic 中的 597 次请求经核查为自动化漏洞扫描（SG/DE/NL 云 IP、空 UA、随机路径、`.env`/`phpinfo` 探测），不是真实访客；已启用 Cloudflare Web Analytics 开始积累可用的 PV/UV
+- 真实人类访问量此前没有统计口径，后续以 Web Analytics 为准；GitHub Pages 域名（小红书笔记中使用）目前未被 beacon 覆盖
+
+---
 ## [Unreleased] — 2026-10-22
 
 ### Notes
