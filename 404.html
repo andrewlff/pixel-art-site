@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>404 · 这一格是空的 — Pixelizer</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='%230a0a0f'/><rect x='2' y='2' width='5' height='5' fill='%2322d3ee'/><rect x='9' y='9' width='5' height='5' fill='%2322d3ee'/></svg>">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --border: #252535;
+    --text: #e8e8f0;
+    --dim: #8888a0;
+    --accent: #22d3ee;
+    --accent2: #a78bfa;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background:
+      linear-gradient(rgba(34, 211, 238, .04) 1px, transparent 1px) 0 0 / 32px 32px,
+      linear-gradient(90deg, rgba(34, 211, 238, .04) 1px, transparent 1px) 0 0 / 32px 32px,
+      radial-gradient(circle at 50% 40%, #14141f 0%, var(--bg) 70%);
+    color: var(--text);
+    font-family: 'SF Mono', 'Cascadia Code', 'JetBrains Mono', Consolas, monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    min-height: 100%;
+  }
+  .wrap { text-align: center; max-width: 520px; }
+  .ghost {
+    width: 128px;
+    height: 128px;
+    image-rendering: pixelated;
+    animation: float 2.4s steps(6, end) infinite;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 24px rgba(34, 211, 238, .25));
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  h1 {
+    font-size: 56px;
+    letter-spacing: 6px;
+    color: var(--accent);
+    text-shadow: 4px 4px 0 #0d5f6b, 8px 8px 0 rgba(0, 0, 0, .45);
+    margin-bottom: 8px;
+  }
+  h2 {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+  }
+  p {
+    font-size: 13px;
+    line-height: 1.9;
+    color: var(--dim);
+    margin-bottom: 26px;
+  }
+  .hint {
+    display: inline-block;
+    border: 1px dashed var(--border);
+    background: var(--surface);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--dim);
+    margin-bottom: 26px;
+  }
+  .hint b { color: var(--accent2); font-weight: 500; }
+  .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  a.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 22px;
+    border-radius: 8px;
+    font-size: 13px;
+    text-decoration: none;
+    transition: transform .12s ease, border-color .12s ease, background .12s ease;
+  }
+  a.primary {
+    background: var(--accent);
+    color: #051014;
+    font-weight: 700;
+    box-shadow: 0 4px 0 #0d5f6b;
+  }
+  a.primary:hover { transform: translateY(-1px); }
+  a.primary:active { transform: translateY(2px); box-shadow: 0 1px 0 #0d5f6b; }
+  a.secondary {
+    border: 1px solid var(--border);
+    color: var(--text);
+    background: var(--surface);
+  }
+  a.secondary:hover { border-color: var(--accent); }
+  .foot { margin-top: 34px; font-size: 11px; color: #55556a; letter-spacing: .5px; }
+</style>
+</head>
+<body>
+  <main class="wrap">
+    <svg class="ghost" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="4" y="1" width="8" height="1" fill="#e8e8f0"/>
+      <rect x="3" y="2" width="10" height="1" fill="#e8e8f0"/>
+      <rect x="2" y="3" width="12" height="7" fill="#e8e8f0"/>
+      <rect x="4" y="5" width="2" height="2" fill="#0a0a0f"/>
+      <rect x="10" y="5" width="2" height="2" fill="#0a0a0f"/>
+      <rect x="7" y="8" width="2" height="1" fill="#0a0a0f"/>
+      <rect x="2" y="10" width="12" height="3" fill="#e8e8f0"/>
+      <rect x="2" y="13" width="3" height="2" fill="#e8e8f0"/>
+      <rect x="6" y="13" width="2" height="2" fill="#e8e8f0"/>
+      <rect x="10" y="13" width="2" height="2" fill="#e8e8f0"/>
+      <rect x="13" y="13" width="1" height="2" fill="#e8e8f0"/>
+      <rect x="5" y="11" width="2" height="1" fill="#22d3ee"/>
+      <rect x="9" y="11" width="2" height="1" fill="#22d3ee"/>
+    </svg>
+    <h1>404</h1>
+    <h2>这一格是空的</h2>
+    <p>你要找的页面不存在，可能已经被像素化掉了。<br>检查一下链接，或者回工具页重新开始。</p>
+    <div class="hint">提示：Pixelizer 是纯前端工具，<b>不会</b>在服务器保存你的图片</div>
+    <div class="actions">
+      <a class="btn primary" href="/">← 返回 Pixelizer</a>
+      <a class="btn secondary" href="https://github.com/andrewlff/pixel-art-site" target="_blank" rel="noopener">GitHub 开源 ↗</a>
+    </div>
+    <div class="foot">PIXELIZER · 在线像素化 + 动作帧</div>
+  </main>
+</body>
+</html>
