@@ -19,6 +19,7 @@ All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 ### Notes
 - 2026-10-22 深夜 Cloudflare Web Traffic 中的 597 次请求经核查为自动化漏洞扫描（SG/DE/NL 云 IP、空 UA、随机路径、`.env`/`phpinfo` 探测），不是真实访客；已启用 Cloudflare Web Analytics 开始积累可用的 PV/UV
 - 真实人类访问量此前没有统计口径，后续以 Web Analytics 为准；GitHub Pages 域名（小红书笔记中使用）目前未被 beacon 覆盖
+- 小红书登录态自 10-04 起连续 20 天失效（10-23 复核），评论回复、笔记发布、求职私信核查继续暂停
 
 ---
 ## [Unreleased] — 2026-10-22
