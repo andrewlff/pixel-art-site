@@ -2,6 +2,14 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+## [Unreleased] — 2026-10-30
+
+### Notes
+- 10-30 无新增功能迭代
+- 小红书登录态自 10-04 起连续 27 天失效（10-30 复核确认 401），评论回复、笔记发布、求职私信核查继续暂停
+- git 状态：10-24/10-25/10-26 区块（e3029b8、e2b48ab、da7a4e0）滞留本地 ahead 3（github.com:443 连续超时/被重置）；10-23 区块与用户 1f4d0d2 已同步远程
+
+---
 ## [Unreleased] — 2026-10-26
 
 ### Notes
