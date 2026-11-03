@@ -2,6 +2,15 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+## [Unreleased] — 2026-11-03
+
+### Notes
+- 小红书登录态恢复（10-04 起失效 30 天后，11-03 确认通知页/消息页正常），评论回复与笔记发布恢复执行
+- 11-03 评论回复：世界有点灵（"这是什么软件呀～急需"）、奶芙饼饼（"哪里"）均已回复 Pixelizer 网页版+仓库链接
+- 11-03 发布小红书图文笔记（B 教程干货型：3 步立绘→像素攻击动画）
+- git 状态：补推 11-01（f09c83b）/10-31（cde9837）两个滞留区块
+
+---
 ## [Unreleased] — 2026-11-01
 
 ### Notes
