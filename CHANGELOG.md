@@ -10,6 +10,8 @@ All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 - 11-07 评论回复：Spark 反馈「该项目包含切图、抽帧、去背景，但不包含生成系列动作帧」属对工具范围的误解，已回复澄清——动作帧生成是主功能，单图模式里的切图/抽帧/去背景是其它工具，动作帧在同一页的动画标签；附主仓库与网页版链接。回复已在笔记详情页确认可见（共 2 条评论）
 - 11-07 发布小红书图文笔记（A 效果展示型）：《一张图4种像素风⚔️参数全公开》，5 图（1 张 3:4 参数对比封面 + 4 张裁切图）
 - 新增配图构建脚本 xiaohongshu_20261107/build_cover.py：从 demo_shots 整页截图自动裁出像素画布，最近邻缩放拼成 3:4 对比封面，避免黑边过多
+- 11-07 发布结果：笔记 note ID 6aeec5a90000000015009ad3，发布成功（创作平台 `published=true`，随后个人主页可见），公开链接 https://www.xiaohongshu.com/explore/6aeec5a90000000015009ad3?xsec_token=ABd2D0gI8k4p0-asMICxkd2xWx37n32UyGG27VoCvFOHs=&xsec_source=pc_user
+- 11-07 发布流程记录（踩坑）：原创开关拨开后必须先过《原创声明须知》确认弹层（勾"我已阅读并同意"→"声明原创"按钮才从 disabled 变 enabled），否则点"发布"会被弹层遮挡（BU_TARGET_OBSCURED）
 
 ---
 ## [Unreleased] — 2026-11-03
