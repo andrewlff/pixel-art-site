@@ -2,6 +2,21 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+## [Unreleased] — 2026-11-08
+
+### Notes
+- 11-08 无代码功能迭代（当日为运营与发布日，代码仓库无变更）
+- 小红书登录态正常（连续第 34 天可用）：通知页、视频发布页、笔记管理页、创作者中心均可直接访问，无 401 / 登录重定向
+- 11-08 评论核查：通知页「评论和@」无新增评论，最新一条仍是 Spark（4 天前，11-07 已回复澄清）；当日新评论 0、已回复 0、待回复 0
+- 11-08 发布小红书视频笔记（C 演示视频型，对应 7 天日历 D3「角色图→图集→GIF 全流程」）：标题《立绘3步变像素攻击动画⚔️开源》（15 字），视频 demo_video.mp4（1080×1920、00:00:36、1,295,759 B），原创声明已开启
+- 11-08 发布结果：note ID 6af015e4000000001a01776b，发布时间 2026-11-08 14:25，状态「审核中」，封面待 PK；公开链接 https://www.xiaohongshu.com/explore/6af015e4000000001a01776b?xsec_token=ABqm5cts0QUkfaSwhMgYkjPneRNa_ZFCxBuT9aLCx7naA=&xsec_source=pc_user
+- 11-08 发布流程（视频页与图文页差异，踩坑）：视频页标题是 `input[placeholder="填写标题会有更多赞哦"]`（ref n54），正文是 `.tiptap.ProseMirror` contenteditable；点正文后直接 type 全文会把追加的标签插到光标落点（本次曾插进主仓库 URL 中间，造成 `https://github.com/andrew` + 标签 + `lff/...` 断链）。正确做法：click 正文 → ctrl+a → Backspace 清空（innerText 长度归 1）→ 一次性 type 完整正文（含末尾 8 个标签）→ press Escape 关闭话题联想，回读 innerText=612 字并逐行校验 URL 完整
+- 11-08 推广数据（Cloudflare）：账号级近 24 小时 Requests 14（-22.2%）、Visits 6（-33.3%）、Bandwidth 235.14 kB；近 7 天 Requests 126（-84.1%）、Visits 38（-56.3%）、Bandwidth 1.23 MB。Pages 项目页 `/pages/view/pixel-art-site` 仍停在 Loading，单项目 UV 无法读取，只能用账号级口径
+- 11-08 GitHub 四仓（pixel-art-action-frames / godot-pixel-batch-tool / unity-pixel-batch-tool / pixel-art-site）star 均 0，与 11-07 持平，无新增
+- 11-08 小红书创作者中心（统计周期 11-01~11-07）：关注 247 / 粉丝 93 / 获赞收藏 188；曝光 3,713（环比 +2610%）、观看 354（+4957%）、封面点击率 9.9%、视频完播率 0%、点赞 11、评论 3、收藏 12、分享 2、净涨粉 0、主页访客 14
+- git 状态：本区块单独提交 CHANGELOG.md 后推送 origin/main
+
+---
 ## [Unreleased] — 2026-11-07
 
 ### Notes
