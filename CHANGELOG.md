@@ -18,6 +18,11 @@ All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 - 11-09 GitHub 四仓（pixel-art-action-frames / godot-pixel-batch-tool / unity-pixel-batch-tool / pixel-art-site）star 均 0，与 11-08 持平，无新增
 - 11-09 Cloudflare 数据未取到：dash.cloudflare.com 连续两次进入「正在进行安全验证」Turnstile 页（Ray ID a5797efc98f3fcba / a57983f5ff23fcba），已按登录/验证交接流程请求人工验证，用户本轮跳过，24h / 7d UV 与请求量为空档
 - git 状态：本区块单独提交 CHANGELOG.md 后推送 origin/main
+- **11-09 复核（当日第二轮）**：今日笔记在 10:57 被判定「未通过」，处置为「限制推荐和搜索展示，广告投放与蒲公英流量不受影响」；存在问题类型为「笔记存在外部平台信息或联系方式 / 文本违规」，违规内容直接点名正文里三行 github.com/andrewlff/... 仓库地址，另提示图6 为仓库首页截图
+- **11-09 整改并重新送审**：删除图5（Unity 仓库首页）、图6（Godot 仓库首页）两张 GitHub 界面截图，保留封面 + godot_preview + unity_preview 共 3 图；正文去掉全部站外 URL，仓库引用改为「按仓库名搜同名项目」的纯文本（godot-pixel-batch-tool / unity-pixel-batch-tool / pixel-art-action-frames），字数 829；原创声明仍开启；提交后状态回到「审核中」，数据保留 曝光 37 / 评论 0 / 赞 3 / 收藏 2 / 分享 1
+- **11-09 noteId 已补**：6af134100000000034018f2c（从修改页 URL publish/update?id=... 取到，此前记为「待补」）
+- **经验**：小红书正文不接受裸 github.com 域名（即使不带 http:// 前缀），也不接受含 GitHub 界面/logo 的截图；开源项目引流只能写「仓库名/项目名」纯文本，把可点击入口留在个人主页与评论区
+- **11-09 二轮评论核查**：通知页仍为原 3 条（Spark 追问 5 小时前、原评论已删除、5 天前的原评论），无新增评论，已回复状态保持
 
 ---
 ## [Unreleased] — 2026-11-08
