@@ -2,6 +2,24 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+## [Unreleased] — 2026-11-09
+
+### Notes
+- 11-09 无代码功能迭代（当日为运营与发布日，代码仓库无变更）
+- 小红书登录态正常（连续第 35 天可用）：通知页、图文发布页、笔记管理页、创作者数据页均可直接访问，无登录重定向
+- 11-09 评论核查：通知页「评论和@」新增 1 条——Spark 追问「哦 那可能是我没有注意到 在哪里可以选择动作模板呢？」（1 小时前，福建），针对 11-03 笔记《3步把立绘变成像素攻击动画⚔️全开源》（noteId 6ae988fb000000000f01e11e）的动作模板入口
+- 11-09 已用评论级回复控件回复（非笔记级评论框）：说明网页版顶部「动画」标签 → 上传立绘 → 动作模板列表，并给出 README「Action templates」章节与网页版入口 https://andrewlff.github.io/pixel-art-site/ ；回复已在笔记详情页确认为第 4 条评论（共 4 条：Spark 原评论 / 我方 11-07 澄清 / Spark 追问 / 我方本次回复），站内状态「刚刚·广东」
+- 11-09 当日互动：新评论 1、已回复 1、待回复 0；同页另有 1 条「评论了你的笔记 / 原评论已删除」系统提示，无正文，记录不回复
+- 11-09 发布小红书图文笔记（D 开源更新型，对应 7 天日历 D4「引擎原生插件·批量像素化」）：标题《Godot/Unity都能批量像素化⚔️》（18 字），6 图（封面 1080×1440 + godot/unity 两仓 docs/preview.png + 三张 README 截图），正文 839/1000 字，原创声明已开启
+- 11-09 发布结果：创作平台返回 `published=true`；笔记管理页首条「审核中 / Godot/Unity都能批量像素化⚔️ / 2026-11-09 10:46 / 曝光 5·评论 0·赞 0·收藏 0·分享 1」，全部 20 篇。noteId 尚未取到（审核中卡片无 noteId 链接，列表页 HTML 无内嵌 noteId），待过审后补录
+- 11-09 新增素材目录 xiaohongshu_20261109：build_cover.py（PIL）生成 1080×1440 3:4 封面（深底 #11131C + 青绿标题 + 960 宽 preview 三联图 + sample 8 倍最近邻放大），素材取自两仓 docs/preview.png（800×208、8,977 B）与 tests/sample.png（64×48、3,411 B）
+- 11-09 图文页发布流程记录（与视频页的差异）：① 图片走 `input[type="file"]` + `upload_file` 一次传 6 张，页面计数 6/18；② 标题 `textbox "填写标题会有更多赞哦"` 直接 type；③ 正文 `.tiptap.ProseMirror` 首次写入超限（1,134 字 / 计数 1,066），须 click 正文 → ctrl+a → Backspace 清空 → 一次性 type 精简版（909 字 / 计数 839）；④ 原创声明入口是 `.original-wrapper .d-switch`（点外层 box 无效，会先被「图片可以编辑啦」新手引导遮挡，需先点「我知道了」），拨开后弹《原创声明须知》→ 勾「我已阅读并同意」→「声明原创」按钮由 disabled 变可用 → 关闭弹层；开关真值看内层 `input[type=checkbox][checked]`
+- 11-09 推广数据（小红书创作者中心，统计周期 11-02~11-08）：曝光 3,909（环比 +3299%）、观看 365（+4462%）、封面点击率 9.8%（+38%）、平均观看时长 12 秒（+15%）、观看总时长 1.3 小时（+4416%）、视频完播率 0%；互动 点赞 11 / 评论 3 / 收藏 12 / 分享 2；总粉丝 93（新增 0、流失 0）；主页访客 16；发布数 3；互动数 26
+- 11-09 GitHub 四仓（pixel-art-action-frames / godot-pixel-batch-tool / unity-pixel-batch-tool / pixel-art-site）star 均 0，与 11-08 持平，无新增
+- 11-09 Cloudflare 数据未取到：dash.cloudflare.com 连续两次进入「正在进行安全验证」Turnstile 页（Ray ID a5797efc98f3fcba / a57983f5ff23fcba），已按登录/验证交接流程请求人工验证，用户本轮跳过，24h / 7d UV 与请求量为空档
+- git 状态：本区块单独提交 CHANGELOG.md 后推送 origin/main
+
+---
 ## [Unreleased] — 2026-11-08
 
 ### Notes
