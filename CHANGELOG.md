@@ -2,6 +2,28 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+## [Unreleased] — 2026-11-10
+
+### Notes
+- 11-10 无代码功能迭代（当日为运营与发布日，四仓无代码提交）
+- 小红书登录态正常（连续第 36 天可用）：通知页、图文发布页、笔记管理页、创作者数据页、粉丝数据页均可直接访问，无登录重定向
+- 11-10 评论核查：通知页「评论和@」仍为原 3 条——Spark 追问「哪里可以选择动作模板呢」（昨天 09:17，11-09 已回复并确认为我方第 4 条评论）、Spark「原评论已删除」系统提示、Spark 6 天前原评论；同页另有旧通知「一面千识 10-08 私信哈」「大话游 09-29 后台dd」；当日新评论 0、已回复 0、待回复 0
+- 11-09 整改版笔记已过审：`6af134100000000034018f2c`（《Godot/Unity都能批量像素化⚔️》）在笔记管理页已无「审核中」标记，数据 曝光 128 / 评论 0 / 赞 8 / 收藏 12 / 分享 2（重投后恢复展示，正文「仅写仓库名」的改写通过了审核）
+- 11-10 发布小红书图文笔记（A 效果展示型，对应 7 天日历 D5「Unity 编辑器窗口批量导出演示」）：标题《Unity编辑器一键批量像素化⚔️》（17 字），4 图，原创声明已开启，正文 659 字（含 8 个话题标签）
+- 11-10 发布结果：创作平台返回「发布成功」页；笔记管理页首条「审核中 / Unity编辑器一键批量像素化⚔️ / 2026-11-10 14:34 / 曝光 0·评论 0·赞 0·收藏 0·分享 0」，全部 21 篇；noteId `6af2bae10000000026024ea6`（从修改页 URL publish/update?id=... 取到）
+- 11-10 新增素材目录 xiaohongshu_20261110：build_images.py（PIL）生成 4 张成图——1080×1440 封面、1080×1300 四角色上下对比、1080×1000 单角色前后对比、1600×416 工具窗口 2 倍图；版式为暖白纸底（BG 242,238,227）＋ 与素材底色一致的卡片（PANEL 184,185,168），消除深色卡片与米白素材的拼接硬边
+- 11-10 配图为真实跑批产物，非示意图：`python scripts/pixelate.py examples/characters/{bone,palm,orbs,ghost}.png batch_final --grid 48 --colors 24 --scale 6 --no-outline`，输出 288×456 / 288×396 / 288×318 / 288×330 RGBA；四张成图与 batch_final 全部逐张目视通过
+- 11-10 参数试错记录（同一批暗色角色素材的可用区间）：32 格 / 16 色 → 脸部糊成一块；64 格 / 32 色（带描边）→ 描边过重；96 格 / 48 色（带描边）→ 颗粒偏细、不像像素画；48 格 / 24 色 / 6 倍 / 关描边 → 颗粒度与角色辨识度平衡最好，最终采用
+- 11-10 死路复核：`chroma_key.py --mode white --tolerance 25`（阈值 255-25*4=155）对 examples/characters 的 184-185 灰白底无效，整幅被误删只剩碎片，该批素材做透明底不可行，改走「保留原底 + 卡片同色」的版式
+- 11-10 图文发布流程踩坑：①「上传图文」点 box ref 报 `BU_TARGET_OBSCURED`，报错信息直接给出遮挡元素为 span（本次 ref n153），改点 span 才切换成功（URL 变为 &from=tab_switch）；② `input[type="file"]` + upload_file 逐张传 4 图，间隔 3s，页面计数 4/18；③ 标题 `textbox "填写标题会有更多赞哦"`，正文 `.tiptap.ProseMirror` 须 click → ctrl+a → Backspace 清空后一次性 type，回读 659 字；④ 原创声明：点 `.original-wrapper .d-switch` 后弹《原创声明须知》→ 勾「我已阅读并同意」→ 点「声明原创」→ 弹层关闭；开关真值看内层 `input[type=checkbox][checked]` 与 `.d-switch-simulator.checked`（`d-switch` 外层 class 不反映状态）；⑤ 笔记管理页卡片默认无链接，须 hover 才出现操作图标，点第 2 个 `.note-card__action-btn`（编辑）才会跳到 publish/update 并暴露 noteId
+- 11-10 文案合规：严格遵守 11-09 判罚结论——正文无任何裸域名（no-http 校验通过）、无 GitHub 界面/logo 截图，仓库引用只写三个仓库名并要求「按仓库名搜同名项目」，可点入口留在个人主页
+- 11-10 推广数据（Cloudflare 账号级，本次未触发 Turnstile）：近 24 小时 Requests 369（+12200%）、Visits 6（+500%）、Bandwidth 1.22 MB；近 7 天 Requests 450（-23.2%）、Visits 43（-27.1%）、Bandwidth 2.32 MB（7 天请求集中在 United States 710 次量级，属爬虫/扫描流量，非真实读者）
+- 11-10 GitHub 四仓（pixel-art-action-frames / godot-pixel-batch-tool / unity-pixel-batch-tool / pixel-art-site）star 均 0，与 11-09 持平，无新增
+- 11-10 小红书创作者中心（统计周期 11-03~11-09）：曝光 5,149（环比 +3714%）、观看 503（+7085%）、封面点击率 10.3%（+128%）、平均观看时长 15 秒（+28%）、观看总时长 2 小时、视频完播率 0%；发布数 4、互动数 48、主页访客 20；总粉丝 93（新增 0、流失 0）
+- 11-10 推广待办（本周四项）仍全部未执行：V2EX 首帖、B站 1 分钟演示视频、GitHub README demo GIF + star badge、掘金技术博客
+- git 状态：本区块单独提交 CHANGELOG.md 后推送 origin/main（未跟踪的 .wrangler/、各类 mp4 与 _check/ 目录均非本次产物，不纳入提交）
+
+---
 ## [Unreleased] — 2026-11-09
 
 ### Notes
