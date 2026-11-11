@@ -2,6 +2,30 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+## [Unreleased] — 2026-11-11
+
+### Notes
+- 11-11 无代码功能迭代（当日为运营与发布日，四仓无代码提交）
+- 小红书登录态正常（连续第 37 天可用）：通知页、图文发布页、笔记管理页、创作者数据页、粉丝数据页均可直接访问，无登录重定向
+- 11-11 评论核查：通知页「评论和@」当日新增 1 条系统通知——小红薯6AF584EC 作者「回复了你的评论 / 1小时前 / 该评论已删除」，无正文，无回复义务；历史 3 条（Spark 追问已回复、Spark「原评论已删除」、Spark 7 天前原评论）与「一面千识 10-08」旧通知状态不变；当日新评论 0、需回复 0、已回复 0
+- 11-11 发布小红书图文笔记（B 教程干货型，对应 7 天日历 D6「透明 GIF 无残影叠加的编码要点」）：标题《透明GIF拖影子？改1个字节就好》（16 字），3 图，原创声明已开启（内层 checkbox=true、弹层已关闭），正文 695/1000 字，含 8 个固定话题标签
+- 11-11 发布结果：创作平台返回 `published=true`；笔记管理页首条「审核中 / 透明GIF拖影子？改1个字节就好 / 2026-11-11 14:28 / 曝光 0·评论 0·赞 0·收藏 0·分享 0」，全部 22 篇；noteId `6af40b0d000000002b038a91`（从首条卡片 `data-impression` 的 noteTarget 取到）
+- 11-11 新增素材目录 xiaohongshu_20261111：make_assets.py（PIL）内含 disposal 对照实验 + 三图生成；成图 1080×1440 封面、1080×1300「残影 vs 正确」上下对照、1080×900 六帧棋盘格预览
+- 11-11 对照实验（真值，非示意）：取仓库 `examples/orbs/orbs_sheet.gif`（512×504 / 6 帧 / 120ms / loop=0）解成 RGBA 帧，用同一批帧分别按 disposal=2 与 disposal=1 重新编码，再逐帧解回统计「正确版 alpha=0 却被上一帧占住」的像素：合计 57,856 px，帧 1→6 依次 0 / 5,760 / 6,208 / 10,368 / 17,472 / 18,048，残影随帧号累积，正是"拖影子"的可复现来源
+- 11-11 文案技术要点（与 scripts/build_gif.py 自述一致）：全局色表 + 专用透明索引、LSD 背景索引指向透明色；每帧 GCE disposal=2（绘帧前恢复背景=透明）；全尺寸帧 + LZW 子块；帧延迟与循环次数须与 JSON 清单对齐（120ms / loop=0）
+- 11-11 文案合规：正文无任何裸域名（no-http 校验通过），无 GitHub 界面截图，仓库引用只写 pixel-art-action-frames / godot-pixel-batch-tool / unity-pixel-batch-tool 三个仓库名并要求「按仓库名搜同名项目」
+- 11-10 笔记已过审并开始有数据：143 曝光 / 评论 0 / 赞 5 / 收藏 4 / 分享 0；11-09 笔记 137 / 0 / 9 / 12 / 2（较昨日 +9 曝光、+1 赞）
+- 11-11 推广数据（Cloudflare 账号级，未触发 Turnstile）：近 24 小时 Requests 48（环比 -87.0%）、Visits 6（0.0%）、Bandwidth 219.08 kB（-82.0%）；国家 NL 98 / US 16 / FI 7 / TW 2；加密请求 46（95.83%）、加密带宽 183.23 kB（83.64%）；缓存命中 2（4.17%）
+- 11-11 推广数据（Cloudflare 近 7 天）：Requests 482（-3.8%）、Visits 39（-39.1%）、Bandwidth 2.33 MB（-15.9%）；国家 US 691 / NL 175 / DE 22 / FI 19 / PL 12 / UK 11 / SE 10 / SG 7 / TW 7 / CH 7 / UA 5 / FR 2；加密请求 379（78.63%）、加密带宽 2.22 MB（95.20%）；24h 跌幅主要来自 11-10 的 US 抓取高峰回落，访客数仍在个位数
+- 11-11 GitHub 四仓（pixel-art-action-frames / godot-pixel-batch-tool / unity-pixel-batch-tool / pixel-art-site）star 均 0，与 11-10 持平；pixel-art-site 页面直连 SSL 失败，改用 `api.github.com/repos/...` 取到 stars=0 / forks=0
+- 11-11 小红书创作者中心（统计周期 11-04~11-10）：曝光 5,273（环比 +245%）、观看 496（+197%）、封面点击率 10%（-13%）、平均观看时长 18 秒（+63%）、观看总时长 2.2 小时（+377%）、视频完播率 0%；发布数 4、互动数 52、主页访客 22、涨粉 1；总粉丝 94（新增 0、流失 0），男 47% / 女 53%
+- 11-11 推广待办（本周四项）仍全部未执行：V2EX 首帖、B站 1 分钟演示视频、GitHub README demo GIF + star badge、掘金技术博客
+- 11-11 环境风险：C 盘仅剩 425 MB（已用 96.5 GB），当日按 L1 白名单清理 %TEMP% / Windows\Temp / D3DSCache / NVIDIA 着色器缓存仅释放约 5 MB（浏览器占用导致大部分临时文件删不掉）；大占用仍为 DoubaoWork 5.33 GB、Chrome User Data 1.04 GB、Edge 290 MB，只报告未动
+- 11-11 磁盘不足已实际打断执行一次：11-10 收尾的 `Remove-Item` 报 `no space on device (system_error=28)` 致设备离线；本日复核遗留项——`_block_1110.md` / `_append_1110.md` 两个临时草稿已删净（Test-Path=false），`今日运营简报_20261110.md` 7,167 B 在位
+- git 状态：本区块单独提交 CHANGELOG.md 后推送 origin/main（scenes/* 删除、.wrangler/、*.mp4 等既有改动均非本次产物，不纳入提交）
+
+---
+
 ## [Unreleased] — 2026-11-10
 
 ### Notes
