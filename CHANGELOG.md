@@ -2,6 +2,20 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+## [Unreleased] — 2026-11-13
+
+### Notes
+- 11-13 无代码功能迭代（当日为运营与发布日，四仓无代码提交）
+- 小红书登录态正常（连续第 39 天可用）：通知页「评论和@」、图文发布页、笔记管理页均可直接访问，无登录重定向
+- 11-13 评论核查：通知页「评论和@」全量读取，最新仍为「洛笙喔 / 2 天前 / 回复了你的评论 · 私 · 报名」与「Spark / 4 天前」两条，后者下方挂着 11-09 我方回复（内容含仓库名与网页版入口）；往后 Momo 09-25、奶芙饼饼 09-21、一颗小布丁 09-19 等均为旧条目。当日新评论 0、已回复 0、待回复 0
+- 11-13 发布小红书图文笔记（D 开源更新型，对应 7 天日历 D7「三件套合集」）：标题《像素化三件套⚔️三端同一套参数》（15/20 字），3 图，原创声明已开启并完成《原创声明须知》勾选与「声明原创」确认（内层 checkbox=true、权益弹层已关闭），正文 680 字，含 8 个固定话题标签（独立游戏 / 像素画 / 游戏开发 / Godot / Unity / 开源项目 / AI绘画 / 设计工具，均已转为 `[话题]#` 蓝色话题 chip）
+- 11-13 发布结果：创作平台返回 `published=true`；笔记管理页首条「审核中 / 像素化三件套⚔️三端同一套参数 / 2026-11-13 14:38 / 曝光 0·评论 0·赞 0·收藏 0·分享 0」，全部 23 篇；noteId 与公开链接待过审后补
+- 11-13 新素材目录 xiaohongshu_20261113：`封面_三件套合集.png`（1080×1440，kicker「开源 · 三件套」+ 四张真实成品 2×2 白卡 + 参数带「48 网格 · 24 色 · 6 倍放大 · 描边可关」）、`工作流_三端同一套参数.png`（1080×980，四列 ①输入 ②参数 ③入口 ④输出，无箭头、单列 225 宽 30 号字，文案压到不溢出）；配图第三张沿用 11-10 的 `xiaohongshu_20261110\对比_四角色批量.png`（1080×1300）
+- 11-13 生图脚本：`make_cover_v3.py`、`make_flow_v4.py` 为最终采用版本；`make_assets_1113.py`、`make_assets_v2.py` 为废弃版本。返工记录两处：① v1 封面把 `godot_preview.png` / `unity_preview.png`（实为配色测试条）误标为"编辑器面板"，属失实，整版废弃；② v3 封面曾给四张成品硬起角色名（与实际图像不符），已删标签，副行改为「同一套参数，同一批输出（四张成品）」。另删除一张 `对比_立绘与像素版.png`（原图本身即像素风，前后无差异，无说服力）
+- 11-13 发布页踩坑与修法（计入操作手册）：正文 TipTap/ProseMirror 编辑器里 `Ctrl+End` 不移动光标、`bu.click` 会把光标落在段落中间，导致话题被插进句子内部（"参数还各 #独立游戏 记各的"）；`Ctrl+A` 后 `Backspace` 清空（JS 校验 `.ProseMirror` innerText 长度≈1）再整体写回是可靠路径；话题必须"输入 # 词 + 点候选行 `box "#xx N浏览"`"才会转成 chip，纯文本不会；原创开关 JS `.click()` 无效、`find` 报 not-visible、`bu.scroll` 报 `kScrollTargetNotUserScrollable`，实际可用路径是 JS 改内部容器 `scrollTop` 后 `click_xy` 点归一化坐标（451,115），弹层内勾选 checkbox 再点「声明原创」
+- 11-13 数据核查（真值）：Cloudflare Pages 项目 `pixel-art-site` Metrics「Last 24 hours」Requests 0 / Subrequests 0 / No data；Web Analytics `siteTag~in=194ff5b1d471470b88fa35908717e500` Visits 0 / Page views 0。GitHub 四仓（pixel-art-action-frames / godot-pixel-batch-tool / unity-pixel-batch-tool / pixel-art-site）star 均 0，与 11-12 基线一致；API 未认证 403，改用仓库页 `"stargazerCount"` 解析
+- 11-13 小红书笔记数据（截至核查时）：11-11 笔记 59 曝光 / 0 评论 / 0 赞 / 1 收藏 / 0 分享；11-10 笔记 161 / 0 / 5 / 4 / 0；11-09 笔记 150 / 0 / 9 / 12 / 2
+- 11-12 缺口记录：`发布记录.md` 末条仍为 11-11 D6（noteId `6af40b0d000000002b038a91`），11-12 无发布记录，当日运营线在云主机环境受阻未执行
 ## [Unreleased] — 2026-11-11
 
 ### Notes
