@@ -2,6 +2,15 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+## [Unreleased] — 2026-11-14
+
+### Notes
+- 11-14 无代码功能迭代（四仓无新提交；当日为运营日，内容侧仅产出文案草稿与核查记录）
+- 小红书登录态中断（连续第 40 天可用记录就此中断）：本机内置浏览器进程退出，`aha_browser_use` 返回 `CDP session is disconnected` / `no browser tab is available`，`list_tabs()` 为空，`Get-Process chrome` 计数为 0；尝试重启 `DoubaoWork_browser_proxy.exe` 后 9222 端口有监听但 `http://127.0.0.1:9222/json/version` 返回 404（无 CDP 端点），`bu` 仍取不到标签页；本机 Chrome 打开 `xiaohongshu.com/notification` 被重定向至 `/login`，该浏览器无小红书登录态
+- 11-14 评论核查：未执行（浏览器不可用），当日新评论 0 / 已回复 0 / 待回复 0 均为「未核查」而非「确认无」
+- 11-14 发布小红书笔记：未执行（同上，创作平台不可达），当日 0 篇；已在 `发布记录.md` 落一份 D8 草稿（标题/正文/8 标签/配图方案）待登录恢复后直接发布
+- 11-14 数据核查：GitHub 四仓 `api.github.com` 读数 — pixel-art-action-frames 0 star、godot-pixel-batch-tool 0 star、unity-pixel-batch-tool 0 star、pixel-art-site 0 star（最新 push 2026-11-13 06:39 UTC，对应 commit `92bd5aa`）；站点 https://pixel-art-site.pages.dev 返回 200（server: cloudflare），线上正常；Cloudflare Pages 昨日 UV/访问量与小红书创作者中心笔记数据**未取到**（无可用 API token，且浏览器分支不可用）
+- 11-14 本周推广待办盘点：小红书周更（11-11、11-13 已发 2 篇，达标）；V2EX 首帖未发；B 站 1 分钟演示视频未录（本地已有 `Pixelizer-demo-final-subtitled.mp4` 等竖屏成品可直接上传）；GitHub README demo GIF + star badge 未加；掘金技术博客未写
 ## [Unreleased] — 2026-11-13
 
 ### Notes
