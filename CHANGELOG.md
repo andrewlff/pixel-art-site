@@ -2,6 +2,20 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+## [Unreleased] — 2026-11-15
+
+### Notes
+- 11-15 无代码功能迭代（四仓无新提交；当日为运营补素材日）
+- 小红书登录态连续第 3 天不可用：`Get-Process chrome` = 0、`DoubaoWork_browser_proxy` = 0；`bu.resync()` 抛 `BrowserSessionError: no browser tab is available`，`list_tabs()` 返回 0（不抛错）；重启 `DoubaoWork_browser_proxy.exe` 后进程数秒内自行退出，`http://127.0.0.1:9222/json/version` 连接被拒（无 CDP 端点）；改用 `cu` 平面 `launch_app`
+  → `LAUNCH_REJECTED`，`switch_desktop("main")` → `user authorization for exclusive (main desktop) mode timed out`
+- 11-15 评论核查：未执行（浏览器不可达），新评论 / 已回复 / 待回复均标「未核查」，当日零外发（0 条回复、0 篇发布、0 次点赞）
+- 11-15 发布小红书笔记：未执行，当日 0 篇；D8 状态由「缺 2 张配图」推进为「素材齐、待登录发布」
+- 11-15 新增资产 `xiaohongshu_20261115\`：`封面_Godot导入发糊.png`（1080×1440，335,248 B）、`参数卡_四项设置.png`（1080×1080，103,845 B）、`特写_边缘对比.png`（1080×1080，95,526 B）、`make_assets.py`
+- 11-15 素材事实：对比图为 `xiaohongshu_post\bone.png` 降采样至 64 宽后，NEAREST / BILINEAR 各放大 6 倍的真实渲染（同源同倍数，仅换滤波）；参数卡为自制清单，卡面标注「非引擎界面截图」，未伪造 Godot 界面
+- 11-15 排版返工：参数卡首版 1080×980 第 4 行与页脚重叠 → 画布 1080×1080、行距 168、说明左移 x=620；特写图原「12 倍放大」标注与实际倍率不符 → 改为「同一处像素，把图放大看边缘」并裁画布至 1080×1080
+- 11-15 数据核查：GitHub 四仓 star / fork / watch 均 0（pixel-art-site 最新 push 2026-11-14 06:22 UTC；pixel-art-action-frames 09-21；两个 batch-tool 09-17）；`https://pixel-art-site.pages.dev` 200（75,966 B，Date 2026-11-15 06:25 UTC）；`https://andrewlff.github.io/pixel-art-site` 200（75,752 B）；Cloudflare Pages UV 与小红书创作者中心笔记数据**未取到**（无 API token，浏览器分支不可用）
+- 11-15 推广待办：小红书本周 11-11 / 11-13 已发 2 篇（周更达标），11-14、11-15 各缺 1 篇；V2EX 首帖、B 站 1 分钟演示视频、GitHub README demo GIF + star badge、掘金技术博客仍未执行
+
 ## [Unreleased] — 2026-11-14
 
 ### Notes
