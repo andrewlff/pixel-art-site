@@ -2,6 +2,18 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+## [Unreleased] — 2026-11-16
+
+### Notes
+- 11-16 无代码功能迭代（四仓无新提交；当日为运营补素材 + 文档日）
+- 小红书登录态连续第 4 天不可用（11-14 起）：`Get-Process chrome` = 0、`DoubaoWork_browser_proxy` = 0；单轮探测 `bu.list_tabs()` 返回 0、`bu.resync()` 抛 `BrowserSessionError: no browser tab is available`；与 11-14/11-15 同症，按约定不再重复重启尝试，浏览器分支直接停止
+- 11-16 评论核查：未执行（浏览器不可达），新评论 / 已回复 / 待回复均记「未核查」，当日零外发（0 条回复、0 篇发布、0 次点赞）
+- 11-16 发布小红书笔记：未执行，当日 0 篇；D8（Godot 导入 4 项设置）素材自 11-15 已齐、仍待登录；今日另起 D10 图文草稿（图集切帧）+ 3 张配图备用
+- 11-16 新增资产 `xiaohongshu_20261116\`：`封面_图集切帧.png`（1080×1440，283,614 B）、`清单_六个字段.png`（1080×1080，93,583 B）、`对照_正确与错切.png`（1080×1080，241,593 B）、`make_assets.py`
+- 11-16 素材事实：源图为 `attack_frames\pixel_alpha\attack_sheet.png`（RGBA，3072×504，6 列 × 1 行，cell 512×504，frame_ms 120，loop true，alpha true，JSON 字段取原值）；裁切由 PIL 按 512 / 500 两种宽度真实执行，第二排可复现 (512−500)×n 的累积偏移，未做示意性拼贴
+- 11-16 排版返工 2 处：① 封面 frame 标签被第二排帧图压住、页脚与第 4–6 帧标签重叠 → 白卡延至 y=1240、帧图 210×207、标签统一画在帧下、说明移出卡外；② 清单卡副标题与主标题重叠、Godot/Unity 说明右侧溢出且末行被裁 → 行卡 100 高 / 112 间距、引擎说明拆两行、声明行上移
+- 11-16 数据核查：GitHub 四仓 star / fork / watch 均 0（pixel-art-site 最新 push 2026-11-15 06:29 UTC；pixel-art-action-frames 09-21；两个 batch-tool 09-17）；`https://pixel-art-site.pages.dev` 200、`https://andrewlff.github.io/pixel-art-site` 200；Cloudflare Pages UV 与小红书创作者中心笔记数据**未取到**（无 API token，浏览器分支不可用）
+- 11-16 推广待办：本周（11-09~11-15）已发 11-11、11-13 两篇，周更 2 篇达标；11-14 / 11-15 / 11-16 各缺 1 篇（连续 3 天缺口）；V2EX 首帖、B 站 1 分钟演示视频、GitHub README demo GIF + star badge、掘金技术博客仍未执行
 ## [Unreleased] — 2026-11-15
 
 ### Notes
