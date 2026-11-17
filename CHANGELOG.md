@@ -2,6 +2,19 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+## [Unreleased] — 2026-11-17
+
+### Notes
+- 11-17 无代码功能迭代（四仓无新提交，GitHub API 实测 pixel-art-site 最新 push 2026-11-16 06:25 UTC、pixel-art-action-frames 09-21 08:12 UTC、两个 batch-tool 09-17 12:48 UTC）
+- 小红书登录态连续第 5 天不可用（11-14 起）：`bu.list_tabs()` 返 0、`bu.resync()` 抛 `BrowserSessionError: no browser tab is available`、`tasklist` 查 `chrome.exe` 为 False；按约定单轮探测即停，不重启、不换平面
+- 11-17 评论核查：未执行（浏览器不可达），新评论 / 已回复 / 待回复均记「未核查」，当日零外发（0 条回复、0 篇发布、0 次点赞）
+- 11-17 发布小红书笔记：未执行，当日 0 篇；队列现为 D8（Godot 导入 4 项设置，素材 11-15 齐）、D10（图集切帧，素材 11-16 齐）、D11（八角色一套参数，素材今日齐）三篇待发
+- 11-17 新增内容 D11「8 个角色，一套参数全出完」（A 类型效果展示，改用彩色角色，回应「换个好点的角色」）：3 张配图落 `xiaohongshu_20261117\`，`封面_八角色一套参数.png`（1080×1440，315,123 B）、`实测_八角色参数表.png`（1080×1080，118,290 B）、`分解_六帧循环.png`（1080×1080，227,633 B）、`make_assets.py`
+- 11-17 素材事实（全部实测，无估算）：8 个角色的 `sheet.png` 尺寸**均为 2364×1773**（RGB）；`<name>_attack.gif` **均为 6 帧、每帧 130 ms、loop=0（无限循环）**，单帧边长分别为 fox_girl 852 / elf_archer 836 / dragon_baby 819 / mage_fireball 869 / sword_boy 852 / alchemist 819 / rogue_dagger 820 / dwarf_warrior 788；6×130 = 780 ms 为一个循环。封面统一取各角色第 1 帧，分解图取 mage_fireball 全 6 帧
+- 11-17 **已知问题（新发现，未修复）**：8 个角色的 GIF 中，有 4 个角色的后段帧残留浅色底（不透明），占帧面积约 fox_girl 24–28%（第 4–6 帧）、dragon_baby 10–16%（第 4–6 帧）、sword_boy 19–25%（第 4–6 帧）、alchemist 34.6% / 60.5%（第 5、6 帧）；mage_fireball、rogue_dagger、dwarf_warrior 三者为 0.0%，elf_archer ≤1.7% 视为干净 → 需按帧重导或整批加色键（第 1 帧均干净，故封面未受影响）
+- 11-17 数据核查：GitHub 四仓 star / fork / watch 仍均 0；`https://pixel-art-site.pages.dev` 200、`https://andrewlff.github.io/pixel-art-site` 200；Cloudflare Pages UV 与小红书创作者中心笔记数据**未取到**（无只读 API token，浏览器分支不可用）
+- 11-17 推广待办：本周（11-16~11-22）截至目前发布 0 篇；日更缺口累计 11-14 / 11-15 / 11-16 / 11-17 共 4 天；V2EX 首帖、B 站 1 分钟演示视频、GitHub README demo GIF + star badge、掘金技术博客仍未执行
+
 ## [Unreleased] — 2026-11-16
 
 ### Notes
