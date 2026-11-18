@@ -2,6 +2,24 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+## [Unreleased] — 2026-11-18
+
+### Fixed
+- **GIF 后段帧露底修复完成**（11-17 记录的已知问题）：新增 `xiaohongshu_20261118\fix_gifs.py`，按「认角色 → 清与边界连通底色 → 逐帧回读验证」三步处理，输出 `xiaohongshu_20261118\fixed_gifs\<role>\<role>_attack_alpha.gif`，8 个角色 × 6 帧全部输出，原素材只读未改动
+  - 修前（原文件实测，偏绿像素占不透明区）：平均 **8.25%**、最高 49.6%（sword_boy 第 5 帧）；fox_girl 38.1%、alchemist 43.4%、dragon_baby 31.0% 为后段帧主要来源
+  - 修后（回读修复文件实测）：平均 **0.36%**、最高 9.1%（dragon_baby 第 5 帧）；sword_boy 49.6% → 0.4%、alchemist 43.4% → 1.2%、fox_girl 38.1% → 0.7%
+  - 逐角色（修前最高 → 修后最高）：fox_girl 38.1%→0.7% / elf_archer 4.0%→0.0% / dragon_baby 31.0%→9.1% / mage_fireball 0.0%→0.0% / sword_boy 49.6%→0.4% / alchemist 43.4%→1.2% / rogue_dagger 0.0%→0.0% / dwarf_warrior 0.0%→0.0%
+  - 修复中发现的两个根因：(1) GIF 四角为 (0,0,0,0)，用「边框中位色」估底色会估成黑色，必须改成以非浅色最大连通体作角色轮廓；(2) 直接以 RGBA 存 GIF 会把透明区写成**不透明黑**，须用显式调色板 + 透明索引 255，并逐帧回读校验（alchemist 第 4–6 帧原图还带一块纯黑底板，已按纯黑规则单独清除）
+
+### Notes
+- 11-18 无新代码提交到三仓（GitHub API 实测：pixel-art-site 最新 push 2026-11-17 06:25 UTC、pixel-art-action-frames 09-21 08:12 UTC、两个 batch-tool 09-17 12:48 UTC）
+- 11-18 小红书登录态连续第 **6** 天不可用：`bu.list_tabs()` 返 0、`resync()` 抛 `BrowserSessionError: no browser tab is available`；本机 chrome.exe 进程已存在（14 个），但内置 `bu` 会话仍未附着，按约定单轮探测即停
+- 11-18 评论核查：**未执行**（浏览器不可达），新评论数 / 已回复数均记「未核查」，当日零外发（0 条回复、0 篇发布、0 次点赞）
+- 11-18 新笔记 D12「GIF 后几帧露底，3步修干净」（教程类）：3 张配图落 `xiaohongshu_20261118\`，`封面_GIF后几帧露底.png`（1080×1440，156,598 B）、`步骤_三步修底.png`（1080×1080，160,223 B）、`实测_八角色修底表.png`（1080×1080，118,131 B），配 `make_assets.py`
+- 待发队列累计：D8（Godot 导入 4 项设置）、D10（图集切帧）、D11（视频说明类）、D12（修 GIF 露底）四篇
+- 11-18 四仓 star/fork/watch 仍全为 0；`pixel-art-site.pages.dev` 与 `andrewlff.github.io/pixel-art-site` 均 200；Cloudflare UV 与小红书创作者中心数据未取到（无只读 API token + 浏览器不可用）
+- 11-18 推送状态：11-17 积压的 `ecc0485` 已补推成功（`55b32c8..ecc0485`），本地与远程同步
+
 ## [Unreleased] — 2026-11-17
 
 ### Notes
