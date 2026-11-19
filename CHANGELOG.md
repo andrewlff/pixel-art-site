@@ -2,6 +2,19 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+## [Unreleased] — 2026-11-19
+
+### Changed
+- **主仓 README 升级**（`pixel-art-action-frames`，提交 `f014968`，已 push）：顶部加 star / fork / license / python 四个 shields.io 徽章；新增「演示」段，嵌 2 个 6 帧透明 GIF（`examples/demo/fox_girl_attack.gif` 145,544 B、`examples/demo/elf_archer_attack.gif` 114,522 B）+ `fox_girl_sheet.png` 图集（528,362 B）；目录结构补 `examples/demo/`
+- README 新增「2026-11-18 更新」段，记录去底数据（8 角色 48 帧，平均残留 8.25% → 0.36%，最坏帧 49.6% → 0.4%）与两类残底（浅绿/浅蓝底板、纯黑底板）的处理顺序
+- 远程回读验收：`raw.githubusercontent.com` 上 README 200、徽章行与 `examples/demo/*.gif` 引用均在；`fox_girl_attack.gif` HEAD 200；shields.io 徽章图 200
+
+### Notes
+- 11-19 小红书登录态连续第 **7** 天不可用：`bu.list_tabs()` 返 `[]`、`resync()` 抛 `BrowserSessionError: no browser tab is available`；按约定单轮探测即停，评论核查与发布均未执行，互动数据记「未核查」，当日零外发
+- 11-19 四仓 star / fork / watch 仍全为 0；`pixel-art-site` 最新 push 2026-11-18 06:36 UTC、`pixel-art-action-frames` 更新为 2026-11-19（本次提交）
+- 11-19 未新增小红书草稿：待发队列已有 4 篇（D8 / D10 / D11 / D12），登录不可用期间再产新稿边际价值低；当日产出改为两项不依赖登录的动作——主仓 README 升级 + V2EX 首帖起草
+- V2EX 首帖草稿落 `promo\v2ex_首帖_分享创造.md`（标题、正文、发布前检查清单齐备），**未发布**，需本人登录 v2ex 发帖
+
 ## [Unreleased] — 2026-11-18
 
 ### Fixed
