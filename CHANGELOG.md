@@ -2,6 +2,25 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+## [Unreleased] — 2026-11-20
+
+### Added
+- **B站演示视频**：`promo\bilibili_demo\pixel-pipeline-demo-60s.mp4`，1920×1080 / 30 fps / 1:04 / H.264，四段结构＝标题卡(4s) → 四步流程卡(8s) → 8 个角色各 5s 循环播放（6 帧 / 130ms）→ 修前修后对比卡(6s) → 仓库卡(6s)；12 段 ffmpeg 编码后 concat
+- **B站封面**：`promo\bilibili_demo\封面_1466x917.png`，三个彩色角色（fox_girl / elf_archer / dragon_baby）＋「立绘 → 透明底像素动画」
+- 生成脚本 `promo\bilibili_demo\build_demo.py`（PIL 画卡 + ffmpeg 合成，可改文案重出）
+- 发布文案 `promo\bilibili_发布文案.md`（标题/简介/标签/分区/时间轴/上传步骤）
+- 抽帧验收图 `promo\bilibili_demo\shots\`（title / flow / role / before-after / outro）
+
+### Fixed
+- 角色卡背景从竖向渐变改纯色：yuv420p 上渐变会压出可见色带，叠在 GIF 周围像一块浅色矩形；改纯色后消失
+- 角色缩放 560→740 px，画面留白过多的问题解决；实测 t=14 与 t=18.1 两帧差异 11.97%，确认动画在动
+- 自查确认 8 帧内均无「不透明近黑」与「半透明残留」像素（elf / fox 六帧逐帧统计为 0）
+
+### Notes
+- 11-20 小红书登录态连续第 **8** 天不可用（`list_tabs()` 返 `[]`、`resync()` 抛 `BrowserSessionError`），评论核查、私信、笔记发布均未执行；互动数据记「未核查」，当日零外发
+- GitHub API 首轮经 7890 代理报 SSL 失败，未取到当日 star；http 直取 README / GIF 仍正常
+- B站视频**未上传**：上传需本人登录（扫码/验证码不可代办），文案与素材已备好
+
 ## [Unreleased] — 2026-11-19
 
 ### Changed
