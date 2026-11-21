@@ -2,6 +2,16 @@
 
 All notable changes to Pixel Art Action Frames & Pixelizer Web Tool.
 
+## [Unreleased] — 2026-11-21
+
+### Added
+- **掘金技术博客**：`promo\juejin_技术博客_GIF透明修底.md`，按「问题 → 三版失败路径 → 连通体分割 → GIF 透明写出 → 实测结果」组织；含三段可运行代码（`pale_mask` 判据、多种子连通生长、`save_alpha_gif` 调色板透明写法），数据取 11-18 实测口径（48 帧平均 8.25% → 0.36%，最坏一帧 49.6% → 0.4%）
+
+### Notes
+- 11-21 小红书登录态连续第 **9** 天不可用（`list_tabs()` 返 `[]`、`resync()` 抛 `BrowserSessionError`），评论核查 / 私信 / 笔记发布均未执行；互动数据仍记「未核查」
+- 四仓 star 经 7890 代理实取：`pixel-art-action-frames` 0 / `pixel-art-site` 0 / `godot` 0 / `unity` 0；`pixel-art-site` pushed 2026-11-20 06:28 UTC（昨日 `27df62a`）
+- 本周五项推广待办进度：README 徽章 + 演示 GIF ✅（11-19）、B站视频 ✅（11-20，未投稿）、掘金博客 ✅ 草稿（今日）、V2EX 草稿待发、小红书 2 篇因登录阻塞未达成
+
 ## [Unreleased] — 2026-11-20
 
 ### Added
